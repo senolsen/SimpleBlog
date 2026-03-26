@@ -1,0 +1,72 @@
+﻿@model IEnumerable<Blog.Core.Entities.Post>
+@{
+    ViewData["Title"] = "Yazılar";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6"><h3 class="mb-0">Yazı Yönetimi</h3></div>
+            <div class="col-sm-6 text-end">
+                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Yeni Yazı Ekle</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Görsel</th>
+                            <th>Başlık</th>
+                            <th>Kategori</th>
+                            <th>Yazar</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.CoverImagePath))
+                                    {
+                                        <img src="@item.CoverImagePath" alt="Kapak" style="width:50px; height:50px; object-fit:cover; border-radius:4px;" />
+                                    }
+                                </td>
+                                <td>@item.Title</td>
+                                <td><span class="badge bg-secondary">@item.Category?.Name</span></td>
+
+                                <td>
+                                    @if (item.AppUser != null)
+                                    {
+                                        <span class="text-primary fw-bold">@item.AppUser.FirstName @item.AppUser.LastName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Bilinmiyor</span>
+                                    }
+                                </td>
+
+                                <td>@item.CreatedDate.ToShortDateString()</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger btn-delete" data-name="'@item.Title' başlıklı yazıyı">
+                                        <i class="fas fa-trash"></i> Sil
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

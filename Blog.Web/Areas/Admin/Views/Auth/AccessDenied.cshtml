@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Yetkisiz Erişim";
+    // Kullanıcı giriş yapmış olduğu için ana iskeleti (Layout) kullanmaya devam ediyoruz
+    Layout = "_AdminLayout";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3 class="mb-0 text-danger"><i class="fas fa-exclamation-triangle"></i> Yetkisiz Erişim (403)</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="error-page text-center mt-5">
+            <h2 class="headline text-warning display-1 fw-bold"> 403</h2>
+            <div class="error-content mt-4">
+                <h3><i class="fas fa-exclamation-triangle text-warning"></i> Oops! Bu sayfayı görme yetkiniz yok.</h3>
+                <p class="lead">
+                    Erişmeye çalıştığınız sayfa veya işlem için gerekli rol izinlerine (Admin vb.) sahip değilsiniz.
+                    Bunun bir hata olduğunu düşünüyorsanız lütfen sistem yöneticiniz ile iletişime geçin.
+                </p>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-primary mt-3">
+                    <i class="fas fa-home"></i> Panele Geri Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

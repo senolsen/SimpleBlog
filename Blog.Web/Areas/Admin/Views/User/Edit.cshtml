@@ -1,0 +1,129 @@
+﻿@model Blog.Web.Areas.Admin.Models.UserEditViewModel
+@{
+    ViewData["Title"] = "Kullanıcı Düzenle";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid"><h3 class="mb-0">Kullanıcı Düzenle</h3></div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card card-warning card-outline">
+            <form asp-action="Edit" method="post" autocomplete="off" id="userForm">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label">Ad</label>
+                            <input asp-for="FirstName" class="form-control" required>
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label">Soyad</label>
+                            <input asp-for="LastName" class="form-control" required>
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">E-posta</label>
+                        <input asp-for="Email" type="email" class="form-control" autocomplete="off" required>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Yeni Şifre <small class="text-muted">(Değiştirmek istemiyorsanız boş bırakın)</small></label>
+                        <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" id="passwordInput">
+                        <span asp-validation-for="Password" class="text-danger"></span>
+
+                        <div class="mt-2 p-2 border rounded bg-light" id="passwordRules" style="display: none;">
+                            <div id="rule-length" class="text-danger"><i class="fas fa-times me-1"></i> En az 6 karakter</div>
+                            <div id="rule-upper" class="text-danger"><i class="fas fa-times me-1"></i> En az 1 büyük harf</div>
+                            <div id="rule-lower" class="text-danger"><i class="fas fa-times me-1"></i> En az 1 küçük harf</div>
+                            <div id="rule-number" class="text-danger"><i class="fas fa-times me-1"></i> En az 1 rakam</div>
+                            <div id="rule-special" class="text-danger"><i class="fas fa-times me-1"></i> En az 1 özel karakter (*, !, # vb.)</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RoleNames" class="form-label">Kullanıcı Rolleri</label>
+                        <select asp-for="RoleNames" asp-items="ViewBag.Roles" class="form-select select2" multiple="multiple" required></select>
+                        <span asp-validation-for="RoleNames" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-warning" id="submitBtn">Değişiklikleri Kaydet</button>
+                    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const passwordInput = document.getElementById("passwordInput");
+            const submitBtn = document.getElementById("submitBtn");
+            const passwordRulesBox = document.getElementById("passwordRules");
+
+            const rules = {
+                length: { regex: /.{6,}/, element: document.getElementById("rule-length") },
+                upper: { regex: /[A-Z]/, element: document.getElementById("rule-upper") },
+                lower: { regex: /[a-z]/, element: document.getElementById("rule-lower") },
+                number: { regex: /[0-9]/, element: document.getElementById("rule-number") },
+                special: { regex: /[^A-Za-z0-9]/, element: document.getElementById("rule-special") }
+            };
+
+            passwordInput.addEventListener("input", function () {
+                const val = passwordInput.value;
+
+                // Şifre kutusu boşsa kuralları gizle ve butonu serbest bırak (Şifre değişmeyecek demektir)
+                if (val.length === 0) {
+                    passwordRulesBox.style.display = "none";
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Şifre yazılmaya başlandıysa kuralları göster
+                passwordRulesBox.style.display = "block";
+                let isValid = true;
+
+                for (const key in rules) {
+                    const rule = rules[key];
+                    if (rule.regex.test(val)) {
+                        rule.element.classList.remove("text-danger");
+                        rule.element.classList.add("text-success");
+                        rule.element.innerHTML = '<i class="fas fa-check me-1"></i>' + rule.element.innerText.trim();
+                    } else {
+                        rule.element.classList.remove("text-success");
+                        rule.element.classList.add("text-danger");
+                        rule.element.innerHTML = '<i class="fas fa-times me-1"></i>' + rule.element.innerText.trim();
+                        isValid = false;
+                    }
+                }
+
+                // Tüm kurallar geçerliyse butonu aktif et, değilse kilitle
+                submitBtn.disabled = !isValid;
+            });
+        });
+    </script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: "Kullanıcıya atanacak rolleri seçin...",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+}
