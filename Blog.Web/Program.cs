@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. MVC Servisleri
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddMemoryCache();
 // 2. Veritabaný (DbContext) ve DB Ayarý
 // appsettings.json'dan aktif veritabaný türünü okuyoruz
 var activeProvider = builder.Configuration["DatabaseSettings:ActiveProvider"];
@@ -68,12 +68,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // 5. Service Katmaný Baðýmlýlýklarý (Dependency Injection - IoC)
-// Generic servis tanýmý
+
+// YENÝ EKLENEN DATA KATMANI KAYITLARI
+builder.Services.AddScoped<Blog.Data.UnitOfWorks.IUnitOfWork, Blog.Data.UnitOfWorks.UnitOfWork>();
+builder.Services.AddScoped(typeof(Blog.Data.Repositories.Abstract.IGenericRepository<>), typeof(Blog.Data.Repositories.Concrete.GenericRepository<>));
+builder.Services.AddScoped<Blog.Data.Repositories.Abstract.IPostRepository, Blog.Data.Repositories.Concrete.PostRepository>();
+
+// MEVCUT SERVÝS KAYITLARI
 builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericManager<>));
-// Entity'lere özel servisler
 builder.Services.AddScoped<IPostService, PostManager>();
-// Eðer ICategoryService açtýysan onun kaydý da bu þekilde olacak:
-// builder.Services.AddScoped<ICategoryService, CategoryManager>();
 
 var app = builder.Build();
 

@@ -1,13 +1,14 @@
 ﻿using Blog.Core.Entities;
 using Blog.Service.Abstract;
-using Blog.Web.Helpers;
+using Blog.Web.Areas.Admin.Models;
+using Blog.Web.Helpers; // Slug üretici için eklendi
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Editör")] // Yazar rolü kategori ekleyip silemez
 public class CategoryController : Controller
 {
     private readonly IGenericService<Category> _categoryService;
@@ -24,71 +25,77 @@ public class CategoryController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create() => View();
+    public IActionResult Create()
+    {
+        return View();
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Category category)
+    public async Task<IActionResult> Create(CategoryCreateViewModel model)
     {
         if (ModelState.IsValid)
         {
-            // SLUG OTOMATİK ÜRETİLİYOR
-            category.Slug = UrlHelper.GenerateSlug(category.Name);
+            var category = new Category
+            {
+                Name = model.Name,
+                MetaTitle = model.MetaTitle,
+                MetaDescription = model.MetaDescription,
+                Slug = UrlHelper.GenerateSlug(model.Name) // Otomatik Slug
+            };
 
             await _categoryService.AddAsync(category);
             TempData["SuccessMessage"] = "Kategori başarıyla eklendi!";
             return RedirectToAction(nameof(Index));
         }
-        return View(category);
+        return View(model);
     }
 
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
         var category = await _categoryService.GetByIdAsync(id);
-
-        // Kategori yoksa veya zaten silinmişse 404 sayfasına gönder
         if (category == null || category.IsDeleted) return NotFound();
 
-        return View(category);
+        var model = new CategoryEditViewModel
+        {
+            Id = category.Id,
+            Name = category.Name,
+            MetaTitle = category.MetaTitle,
+            MetaDescription = category.MetaDescription
+        };
+
+        return View(model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Category category)
+    public async Task<IActionResult> Edit(CategoryEditViewModel model)
     {
         if (ModelState.IsValid)
         {
-            var existingCategory = await _categoryService.GetByIdAsync(category.Id);
-            if (existingCategory == null) return NotFound();
+            var category = await _categoryService.GetByIdAsync(model.Id);
+            if (category == null || category.IsDeleted) return NotFound();
 
-            // Kategori Adını Güncelle
-            existingCategory.Name = category.Name;
+            category.Name = model.Name;
+            category.MetaTitle = model.MetaTitle;
+            category.MetaDescription = model.MetaDescription;
+            category.Slug = UrlHelper.GenerateSlug(model.Name); // Güncellenen Slug
 
-            // YENİ EKLENEN SEO ALANLARINI GÜNCELLE
-            existingCategory.MetaTitle = category.MetaTitle;
-            existingCategory.MetaDescription = category.MetaDescription;
-
-            // Kategori adı değişmiş olabileceği için Slug'ı yeniden üretiyoruz
-            existingCategory.Slug = UrlHelper.GenerateSlug(category.Name);
-
-            await _categoryService.UpdateAsync(existingCategory);
-
-            // Başarı mesajını ekliyoruz
+            await _categoryService.UpdateAsync(category);
             TempData["SuccessMessage"] = "Kategori başarıyla güncellendi!";
             return RedirectToAction(nameof(Index));
         }
-        return View(category);
+        return View(model);
     }
 
-    // Soft Delete İşlemi
     public async Task<IActionResult> Delete(int id)
     {
         var category = await _categoryService.GetByIdAsync(id);
         if (category != null)
         {
-            // GenericManager içindeki IsDeleted = true mantığı çalışacak
             await _categoryService.RemoveAsync(category);
+            TempData["SuccessMessage"] = "Kategori başarıyla silindi!";
         }
         return RedirectToAction(nameof(Index));
     }

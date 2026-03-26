@@ -16,4 +16,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<PostImage> PostImages { get; set; } // Eklediysen
 
     public DbSet<Contact> Contacts { get; set; }
+
+    public DbSet<SiteSetting> SiteSettings { get; set; }
 }

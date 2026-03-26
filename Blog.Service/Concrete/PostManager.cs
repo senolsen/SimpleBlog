@@ -1,29 +1,34 @@
 ﻿using Blog.Core.Entities;
-using Blog.Data.Context;
+using Blog.Data.Repositories.Abstract;
+using Blog.Data.UnitOfWorks;
 using Blog.Service.Abstract;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Blog.Service.Concrete;
 
 public class PostManager : GenericManager<Post>, IPostService
 {
-    public PostManager(AppDbContext context) : base(context)
+    private readonly IPostRepository _postRepository;
+    private readonly IMemoryCache _memoryCache;
+
+    public PostManager(IGenericRepository<Post> repository, IUnitOfWork unitOfWork, IMemoryCache memoryCache, IPostRepository postRepository)
+        : base(repository, unitOfWork, memoryCache)
     {
+        _postRepository = postRepository;
+        _memoryCache = memoryCache;
     }
 
     public async Task<IEnumerable<Post>> GetPostsWithCategoryAsync(string? userId = null)
     {
-        var query = _context.Posts
-            .Include(p => p.Category)
-            .Include(p => p.AppUser) // Tabloya yazar bilgisini de dahil ediyoruz
-            .Where(p => !p.IsDeleted);
+        // Admin ve Yazar için ayrı ayrı cache key oluşturuyoruz
+        string customCacheKey = $"PostsWithCategory_{userId ?? "All"}";
 
-        // Eğer dışarıdan bir userId gönderilmişse (Yazar giriş yapmışsa), sadece onun yazılarını filtrele
-        if (!string.IsNullOrEmpty(userId))
+        if (!_memoryCache.TryGetValue(customCacheKey, out IEnumerable<Post>? cachedPosts))
         {
-            query = query.Where(p => p.AppUserId == userId);
+            cachedPosts = await _postRepository.GetPostsWithCategoryAsync(userId);
+            _memoryCache.Set(customCacheKey, cachedPosts, TimeSpan.FromMinutes(10)); // 10 dakikalık cache
         }
 
-        return await query.OrderByDescending(p => p.CreatedDate).ToListAsync();
+        return cachedPosts ?? Enumerable.Empty<Post>();
     }
 }
