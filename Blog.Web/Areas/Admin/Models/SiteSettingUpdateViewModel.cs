@@ -28,4 +28,7 @@ public class SiteSettingUpdateViewModel
     public string? LinkedinUrl { get; set; }
 
     public string? GoogleAnalyticsCode { get; set; }
+
+    public string? MapUrl { get; set; }
+    public string? WorkingHours { get; set; }
 }

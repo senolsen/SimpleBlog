@@ -21,4 +21,8 @@ public class SiteSetting : BaseEntity
 
     // Gelişmiş Ayarlar (SEO/Analytics vb.)
     public string? GoogleAnalyticsCode { get; set; }
+
+    // İletişim Bilgileri (Öncekilerin altına ekle)
+    public string? MapUrl { get; set; } // Google Maps Iframe kodu veya linki
+    public string? WorkingHours { get; set; } // Örn: Pzt-Cuma 09:00 - 18:00
 }

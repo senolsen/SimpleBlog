@@ -23,17 +23,19 @@
         <div class="card card-primary card-outline">
             <form asp-action="Index" method="post" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ExistingLogoPath" />
+                <input type="hidden" asp-for="ExistingFaviconPath" />
 
                 <div class="card-body">
                     <ul class="nav nav-tabs" id="settingTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">Genel</button>
+                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab"><i class="fas fa-globe me-1"></i> Genel</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">İletişim & Sosyal</button>
+                            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"><i class="fas fa-address-book me-1"></i> İletişim & Sosyal</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab">Gelişmiş</button>
+                            <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab"><i class="fas fa-cogs me-1"></i> Gelişmiş</button>
                         </li>
                     </ul>
 
@@ -54,7 +56,15 @@
                                     <input type="file" asp-for="LogoFile" class="form-control" accept="image/*">
                                     @if (!string.IsNullOrEmpty(Model.ExistingLogoPath))
                                     {
-                                        <div class="mt-2"><img src="@Model.ExistingLogoPath" height="40" alt="Logo" /></div>
+                                        <div class="mt-2"><img src="@Model.ExistingLogoPath" height="40" alt="Logo" class="border rounded p-1" /></div>
+                                    }
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FaviconFile" class="form-label">Favicon (Sekme İkonu)</label>
+                                    <input type="file" asp-for="FaviconFile" class="form-control" accept="image/*">
+                                    @if (!string.IsNullOrEmpty(Model.ExistingFaviconPath))
+                                    {
+                                        <div class="mt-2"><img src="@Model.ExistingFaviconPath" height="32" alt="Favicon" class="border rounded p-1" /></div>
                                     }
                                 </div>
                             </div>
@@ -64,32 +74,54 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label asp-for="ContactEmail" class="form-label">E-Posta Adresi</label>
-                                    <input asp-for="ContactEmail" class="form-control">
+                                    <input asp-for="ContactEmail" class="form-control" placeholder="Örn: info@siteadi.com">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label asp-for="ContactPhone" class="form-label">Telefon Numarası</label>
-                                    <input asp-for="ContactPhone" class="form-control">
+                                    <input asp-for="ContactPhone" class="form-control" placeholder="Örn: +90 5XX XXX XX XX">
                                 </div>
                                 <div class="col-md-4 mb-3">
+                                    <label asp-for="WorkingHours" class="form-label">Çalışma Saatleri</label>
+                                    <input asp-for="WorkingHours" class="form-control" placeholder="Örn: Pzt - Cuma: 09:00 - 18:00">
+                                </div>
+
+                                <div class="col-md-12 mb-3">
                                     <label asp-for="ContactAddress" class="form-label">Açık Adres</label>
-                                    <input asp-for="ContactAddress" class="form-control">
+                                    <textarea asp-for="ContactAddress" class="form-control" rows="2"></textarea>
                                 </div>
-                                <hr />
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="GithubUrl" class="form-label">GitHub URL</label>
-                                    <input asp-for="GithubUrl" class="form-control">
+
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="MapUrl" class="form-label">Google Haritalar URL (Iframe src linki)</label>
+                                    <textarea asp-for="MapUrl" class="form-control" rows="2" placeholder="Google Maps'ten aldığınız iframe içindeki linki buraya yapıştırın."></textarea>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="LinkedinUrl" class="form-label">LinkedIn URL</label>
-                                    <input asp-for="LinkedinUrl" class="form-control">
+
+                                <hr class="mt-2 mb-4" />
+                                <h5 class="text-primary mb-3"><i class="fas fa-share-alt"></i> Sosyal Medya Linkleri</h5>
+
+                                <div class="col-md-3 mb-3">
+                                    <label asp-for="FacebookUrl" class="form-label">Facebook</label>
+                                    <input asp-for="FacebookUrl" class="form-control" placeholder="https://facebook.com/...">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label asp-for="InstagramUrl" class="form-label">Instagram</label>
+                                    <input asp-for="InstagramUrl" class="form-control" placeholder="https://instagram.com/...">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label asp-for="GithubUrl" class="form-label">GitHub</label>
+                                    <input asp-for="GithubUrl" class="form-control" placeholder="https://github.com/...">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label asp-for="LinkedinUrl" class="form-label">LinkedIn</label>
+                                    <input asp-for="LinkedinUrl" class="form-control" placeholder="https://linkedin.com/in/...">
                                 </div>
                             </div>
                         </div>
 
                         <div class="tab-pane fade" id="advanced" role="tabpanel">
                             <div class="mb-3">
-                                <label asp-for="GoogleAnalyticsCode" class="form-label">Google Analytics Kodu (Sadece Script etiketi arası)</label>
-                                <textarea asp-for="GoogleAnalyticsCode" class="form-control" rows="4"></textarea>
+                                <label asp-for="GoogleAnalyticsCode" class="form-label">Google Analytics / Tag Manager Kodu</label>
+                                <textarea asp-for="GoogleAnalyticsCode" class="form-control" rows="6" placeholder="Örn: UA-XXXXX-Y veya <script>...</script>"></textarea>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Sitenin head etiketleri arasına eklenecek takip kodları.</small>
                             </div>
                         </div>
 
@@ -97,6 +129,7 @@
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Ayarları Kaydet</button>
+                    <a asp-action="Index" asp-controller="Dashboard" class="btn btn-secondary">Vazgeç</a>
                 </div>
             </form>
         </div>
