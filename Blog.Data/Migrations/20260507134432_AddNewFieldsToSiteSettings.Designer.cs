@@ -4,6 +4,7 @@ using Blog.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blog.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507134432_AddNewFieldsToSiteSettings")]
+    partial class AddNewFieldsToSiteSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,51 +169,6 @@ namespace Blog.Data.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Blog.Core.Entities.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("Comments");
-                });
-
             modelBuilder.Entity("Blog.Core.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -257,9 +215,6 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
@@ -304,21 +259,6 @@ namespace Blog.Data.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("PostImages");
-                });
-
-            modelBuilder.Entity("Blog.Core.Entities.PostTag", b =>
-                {
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PostId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("PostTags");
                 });
 
             modelBuilder.Entity("Blog.Core.Entities.SiteSetting", b =>
@@ -396,39 +336,6 @@ namespace Blog.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SiteSettings");
-                });
-
-            modelBuilder.Entity("Blog.Core.Entities.Tag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -537,17 +444,6 @@ namespace Blog.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Blog.Core.Entities.Comment", b =>
-                {
-                    b.HasOne("Blog.Core.Entities.Post", "Post")
-                        .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-                });
-
             modelBuilder.Entity("Blog.Core.Entities.Post", b =>
                 {
                     b.HasOne("Blog.Core.Entities.AppUser", "AppUser")
@@ -574,25 +470,6 @@ namespace Blog.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("Blog.Core.Entities.PostTag", b =>
-                {
-                    b.HasOne("Blog.Core.Entities.Post", "Post")
-                        .WithMany("PostTags")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Blog.Core.Entities.Tag", "Tag")
-                        .WithMany("PostTags")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -653,16 +530,7 @@ namespace Blog.Data.Migrations
 
             modelBuilder.Entity("Blog.Core.Entities.Post", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Images");
-
-                    b.Navigation("PostTags");
-                });
-
-            modelBuilder.Entity("Blog.Core.Entities.Tag", b =>
-                {
-                    b.Navigation("PostTags");
                 });
 #pragma warning restore 612, 618
         }

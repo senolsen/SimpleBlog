@@ -31,4 +31,8 @@ public class SiteSettingUpdateViewModel
 
     public string? MapUrl { get; set; }
     public string? WorkingHours { get; set; }
+
+    public string? AdsenseCode { get; set; }
+    public string? SidebarAdCode { get; set; }
+    public string? PostBottomAdCode { get; set; }
 }

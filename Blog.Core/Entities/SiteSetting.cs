@@ -25,4 +25,8 @@ public class SiteSetting : BaseEntity
     // İletişim Bilgileri (Öncekilerin altına ekle)
     public string? MapUrl { get; set; } // Google Maps Iframe kodu veya linki
     public string? WorkingHours { get; set; } // Örn: Pzt-Cuma 09:00 - 18:00
+
+    public string? AdsenseCode { get; set; } // Ana AdSense scripti
+    public string? SidebarAdCode { get; set; } // Yan menü reklam alanı
+    public string? PostBottomAdCode { get; set; } // Yazı altı reklam alanı
 }

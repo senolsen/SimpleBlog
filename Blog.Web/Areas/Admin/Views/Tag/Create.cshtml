@@ -1,0 +1,31 @@
+﻿@model Blog.Web.Areas.Admin.Models.TagCreateViewModel
+@{
+    ViewData["Title"] = "Yeni Etiket";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0">Yeni Etiket Ekle</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card card-primary card-outline">
+            <form asp-action="Create" method="post">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Etiket Adı</label>
+                        <input asp-for="Name" class="form-control" placeholder="Örn: C#, Yapay Zeka, Teknoloji" required>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                        <small class="text-muted">Başında # kullanmanıza gerek yoktur, sistem otomatik ayarlayacaktır.</small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Kaydet</button>
+                    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

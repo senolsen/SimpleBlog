@@ -37,6 +37,9 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab"><i class="fas fa-cogs me-1"></i> Gelişmiş</button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ads-tab" data-bs-toggle="tab" data-bs-target="#ads" type="button" role="tab"><i class="fas fa-ad me-1"></i> Reklam Yönetimi</button>
+                        </li>
                     </ul>
 
                     <div class="tab-content pt-4" id="settingTabsContent">
@@ -122,6 +125,21 @@
                                 <label asp-for="GoogleAnalyticsCode" class="form-label">Google Analytics / Tag Manager Kodu</label>
                                 <textarea asp-for="GoogleAnalyticsCode" class="form-control" rows="6" placeholder="Örn: UA-XXXXX-Y veya <script>...</script>"></textarea>
                                 <small class="text-muted"><i class="fas fa-info-circle"></i> Sitenin head etiketleri arasına eklenecek takip kodları.</small>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="ads" role="tabpanel">
+                            <div class="mb-3">
+                                <label asp-for="AdsenseCode" class="form-label">Google AdSense Auto Ads Kodu (Head içine)</label>
+                                <textarea asp-for="AdsenseCode" class="form-control" rows="3" placeholder="<script...></script>"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="SidebarAdCode" class="form-label">Sidebar (Yan Menü) Reklam Kodu</label>
+                                <textarea asp-for="SidebarAdCode" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="PostBottomAdCode" class="form-label">Yazı Altı Reklam Kodu</label>
+                                <textarea asp-for="PostBottomAdCode" class="form-control" rows="3"></textarea>
                             </div>
                         </div>
 

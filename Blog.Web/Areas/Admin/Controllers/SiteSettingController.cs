@@ -51,7 +51,10 @@ public class SiteSettingController : Controller
             InstagramUrl = setting.InstagramUrl,
             GithubUrl = setting.GithubUrl,
             LinkedinUrl = setting.LinkedinUrl,
-            GoogleAnalyticsCode = setting.GoogleAnalyticsCode
+            GoogleAnalyticsCode = setting.GoogleAnalyticsCode,
+            AdsenseCode = setting.AdsenseCode,
+            SidebarAdCode = setting.SidebarAdCode,
+            PostBottomAdCode = setting.PostBottomAdCode
         };
 
         return View(model);
@@ -92,6 +95,9 @@ public class SiteSettingController : Controller
             setting.GithubUrl = model.GithubUrl;
             setting.LinkedinUrl = model.LinkedinUrl;
             setting.GoogleAnalyticsCode = model.GoogleAnalyticsCode;
+            setting.AdsenseCode = model.AdsenseCode;
+            setting.SidebarAdCode = model.SidebarAdCode;
+            setting.PostBottomAdCode = model.PostBottomAdCode;
 
             await _settingService.UpdateAsync(setting);
             TempData["SuccessMessage"] = "Site ayarları başarıyla güncellendi!";

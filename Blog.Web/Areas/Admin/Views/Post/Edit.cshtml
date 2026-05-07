@@ -32,7 +32,12 @@
                         </select>
                         <span asp-validation-for="CategoryId" class="text-danger"></span>
                     </div>
-
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-tags text-warning"></i> Etiketler</label>
+                        <select asp-for="SelectedTagIds" asp-items="ViewBag.Tags" class="form-control select2" multiple="multiple" data-placeholder="Etiket seçin veya arayın...">
+                        </select>
+                        <small class="text-muted">Aramak için yazın, birden fazla etiket seçebilirsiniz.</small>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label d-block">Mevcut Kapak Fotoğrafı</label>
                         @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
@@ -115,5 +120,23 @@
             // Editörün içindeki HTML formatlı metni gizli input'a aktar
             hiddenContent.value = quill.root.innerHTML;
         };
+    </script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Select2 eklentisini aktif et
+            $('.select2').select2({
+                theme: "classic",
+                width: '100%',
+                language: {
+                    noResults: function () {
+                        return "Etiket bulunamadı.";
+                    }
+                }
+            });
+        });
     </script>
 }

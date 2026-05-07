@@ -2,7 +2,7 @@
 using Blog.Core.Entities;
 using Blog.Service.Abstract;
 using Blog.Web.Areas.Admin.Models;
-using Blog.Web.Helpers; // SLUG ÜRETİCİ İÇİN EKLENDİ
+using Blog.Web.Helpers; // SLUG ÜRETİCİ VE İMAJ HELPER İÇİN EKLENDİ
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,12 +15,14 @@ public class PostController : Controller
 {
     private readonly IPostService _postService;
     private readonly IGenericService<Category> _categoryService;
+    private readonly IGenericService<Tag> _tagService;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public PostController(IPostService postService, IGenericService<Category> categoryService, IWebHostEnvironment webHostEnvironment)
+    public PostController(IPostService postService, IGenericService<Category> categoryService, IGenericService<Tag> tagService, IWebHostEnvironment webHostEnvironment)
     {
         _postService = postService;
         _categoryService = categoryService;
+        _tagService = tagService;
         _webHostEnvironment = webHostEnvironment;
     }
 
@@ -37,6 +39,11 @@ public class PostController : Controller
     {
         var categories = await _categoryService.WhereAsync(c => !c.IsDeleted);
         ViewBag.Categories = new SelectList(categories, "Id", "Name");
+
+        // YENİ: Etiketleri View'a gönderiyoruz
+        var tags = await _tagService.WhereAsync(t => !t.IsDeleted);
+        ViewBag.Tags = new SelectList(tags, "Id", "Name");
+
         return View();
     }
 
@@ -56,12 +63,14 @@ public class PostController : Controller
                 // YENİ SEO ALANLARI VE OTOMATİK SLUG
                 MetaTitle = model.MetaTitle,
                 MetaDescription = model.MetaDescription,
-                Slug = UrlHelper.GenerateSlug(model.Title)
+                Slug = UrlHelper.GenerateSlug(model.Title),
+                PostTags = model.SelectedTagIds.Select(tagId => new PostTag { TagId = tagId }).ToList()
             };
 
-            // ... (Resim yükleme kodları aynı kalıyor) ...
+            // GÜVENLİK VE WEBP DÖNÜŞÜMÜ
             if (model.CoverImageFile != null && model.CoverImageFile.Length > 0)
             {
+                // 1. GÜVENLİK VE DOĞRULAMA (Burası kalıyor)
                 const int maxFileSize = 5 * 1024 * 1024;
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                 var extension = Path.GetExtension(model.CoverImageFile.FileName).ToLowerInvariant();
@@ -74,18 +83,8 @@ public class PostController : Controller
                     return View(model);
                 }
 
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                string uniqueFileName = Guid.NewGuid().ToString() + extension;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.CoverImageFile.CopyToAsync(fileStream);
-                }
-
-                post.CoverImagePath = "/uploads/" + uniqueFileName;
+                // 2. ÇEVİRME VE KAYDETME (posts klasörüne atar)
+                post.CoverImagePath = await ImageHelper.UploadAndConvertToWebpAsync(model.CoverImageFile, _webHostEnvironment.WebRootPath, "posts");
             }
 
             await _postService.AddAsync(post);
@@ -101,7 +100,7 @@ public class PostController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var post = await _postService.GetByIdAsync(id);
+        var post = await _postService.GetPostByIdWithTagsAsync(id);
         if (post == null || post.IsDeleted) return NotFound();
 
         if (User.IsInRole("Yazar") && post.AppUserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
@@ -119,11 +118,15 @@ public class PostController : Controller
 
             // YENİ SEO ALANLARINI MODEL'E YÜKLÜYORUZ
             MetaTitle = post.MetaTitle,
-            MetaDescription = post.MetaDescription
+            MetaDescription = post.MetaDescription,
+            SelectedTagIds = post.PostTags?.Select(pt => pt.TagId).ToList() ?? new List<int>()
         };
 
         var categories = await _categoryService.WhereAsync(c => !c.IsDeleted);
         ViewBag.Categories = new SelectList(categories, "Id", "Name", post.CategoryId);
+
+        var tags = await _tagService.WhereAsync(t => !t.IsDeleted);
+        ViewBag.Tags = new SelectList(tags, "Id", "Name");
 
         return View(model);
     }
@@ -134,7 +137,7 @@ public class PostController : Controller
     {
         if (ModelState.IsValid)
         {
-            var post = await _postService.GetByIdAsync(model.Id);
+            var post = await _postService.GetPostByIdWithTagsAsync(model.Id);
             if (post == null) return NotFound();
 
             if (User.IsInRole("Yazar") && post.AppUserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
@@ -151,9 +154,11 @@ public class PostController : Controller
             post.MetaDescription = model.MetaDescription;
             post.Slug = UrlHelper.GenerateSlug(model.Title);
 
-            // ... (Resim yükleme ve silme kodları aynı kalıyor) ...
+          
+            // GÜVENLİK VE WEBP DÖNÜŞÜMÜ (GÜNCELLEME İŞLEMİ)
             if (model.NewCoverImageFile != null && model.NewCoverImageFile.Length > 0)
             {
+                // 1. GÜVENLİK VE DOĞRULAMA
                 const int maxFileSize = 5 * 1024 * 1024;
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                 var extension = Path.GetExtension(model.NewCoverImageFile.FileName).ToLowerInvariant();
@@ -166,15 +171,7 @@ public class PostController : Controller
                     return View(model);
                 }
 
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                string uniqueFileName = Guid.NewGuid().ToString() + extension;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.NewCoverImageFile.CopyToAsync(fileStream);
-                }
-
+                // Eski resmi fiziksel olarak silme işlemi (sunucu dolmasın diye)
                 if (!string.IsNullOrEmpty(post.CoverImagePath))
                 {
                     var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, post.CoverImagePath.TrimStart('/'));
@@ -184,7 +181,19 @@ public class PostController : Controller
                     }
                 }
 
-                post.CoverImagePath = "/uploads/" + uniqueFileName;
+                // 2. YENİ RESMİ ÇEVİR VE KAYDET (posts klasörüne atar)
+                post.CoverImagePath = await ImageHelper.UploadAndConvertToWebpAsync(model.NewCoverImageFile, _webHostEnvironment.WebRootPath, "posts");
+            }
+
+            post.PostTags ??= new List<PostTag>();
+            post.PostTags.Clear();
+
+            if (model.SelectedTagIds != null && model.SelectedTagIds.Any())
+            {
+                foreach (var tagId in model.SelectedTagIds)
+                {
+                    post.PostTags.Add(new PostTag { TagId = tagId, PostId = post.Id });
+                }
             }
 
             await _postService.UpdateAsync(post);

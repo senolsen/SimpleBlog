@@ -5,4 +5,7 @@ namespace Blog.Service.Abstract;
 public interface IPostService : IGenericService<Post>
 {
     Task<IEnumerable<Post>> GetPostsWithCategoryAsync(string? userId = null);
+    Task<Post?> GetPostByIdWithTagsAsync(int id);
+
+    Task IncreaseViewCountAsync(int id);
 }

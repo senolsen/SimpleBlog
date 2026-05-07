@@ -10,10 +10,10 @@ namespace Blog.Service.Concrete;
 
 public class GenericManager<T> : IGenericService<T> where T : BaseEntity
 {
-    private readonly IGenericRepository<T> _repository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMemoryCache _memoryCache;
-    private readonly string _cacheKey;
+    protected readonly IGenericRepository<T> _repository;
+    protected readonly IUnitOfWork _unitOfWork;
+    protected readonly IMemoryCache _memoryCache;
+    protected readonly string _cacheKey;
 
     public GenericManager(IGenericRepository<T> repository, IUnitOfWork unitOfWork, IMemoryCache memoryCache)
     {

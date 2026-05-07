@@ -1,0 +1,88 @@
+﻿@model IEnumerable<Blog.Core.Entities.Comment>
+@{
+    ViewData["Title"] = "Yorumlar";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0">Yorum Yönetimi</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-1"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card card-outline card-primary">
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Yazar</th>
+                            <th>Yorum İçeriği</th>
+                            <th>Tarih</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@item.Name</strong><br />
+                                    <small class="text-muted">@item.Email</small>
+                                </td>
+                                <td style="max-width: 300px; white-space: normal;">
+                                    @item.Content
+                                </td>
+                                <td>@item.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.IsApproved)
+                                    {
+                                        <span class="badge bg-success">Yayında</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Onay Bekliyor</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        @if (!item.IsApproved)
+                                        {
+                                            <form asp-action="Approve" asp-route-id="@item.Id" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-success" title="Onayla"><i class="fas fa-check"></i></button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Reject" asp-route-id="@item.Id" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-secondary" title="Yayından Kaldır"><i class="fas fa-times"></i></button>
+                                            </form>
+                                        }
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1" onclick="return confirm('Bu yorumu tamamen silmek istediğinize emin misiniz?');" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">Sistemde henüz hiç yorum bulunmuyor.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

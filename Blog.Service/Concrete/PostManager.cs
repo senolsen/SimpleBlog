@@ -31,4 +31,25 @@ public class PostManager : GenericManager<Post>, IPostService
 
         return cachedPosts ?? Enumerable.Empty<Post>();
     }
+
+    public async Task<Post?> GetPostByIdWithTagsAsync(int id)
+    {
+        return await _postRepository.GetPostByIdWithTagsAsync(id);
+    }
+
+    public async Task IncreaseViewCountAsync(int id)
+    {
+        var post = await _repository.GetByIdAsync(id);
+        if (post != null)
+        {
+            post.ViewCount += 1; // Sayacı 1 artır
+
+            _repository.Update(post);
+            await _unitOfWork.CommitAsync();
+
+            // Not: Normalde UpdateAsync metodumuzda cache'i siliyorduk. 
+            // Ancak her sayfa okunmasında tüm Cache'i patlatmak performansı mahveder.
+            // Bu yüzden sadece sayacı artırıp, Global Cache'e dokunmuyoruz.
+        }
+    }
 }

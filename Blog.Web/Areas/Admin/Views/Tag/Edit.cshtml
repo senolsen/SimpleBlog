@@ -1,0 +1,31 @@
+﻿@model Blog.Web.Areas.Admin.Models.TagEditViewModel
+@{
+    ViewData["Title"] = "Etiket Düzenle";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0">Etiket Düzenle</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card card-warning card-outline">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Etiket Adı</label>
+                        <input asp-for="Name" class="form-control" required>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-warning"><i class="fas fa-sync-alt me-1"></i> Değişiklikleri Kaydet</button>
+                    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Blog.Core.Entities.Tag>
+@{
+    ViewData["Title"] = "Etiketler";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3 class="mb-0">Etiket Yönetimi</h3>
+            </div>
+            <div class="col-sm-6 text-end">
+                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Yeni Etiket Ekle</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-1"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card card-outline card-primary">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Etiket Adı</th>
+                            <th>Oluşturulma Tarihi</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td><span class="badge bg-secondary">#@item.Name</span></td>
+                                <td>@item.CreatedDate.ToString("dd.MM.yyyy")</td>
+                                <td class="text-end">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Düzenle</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bu etiketi silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">Henüz hiç etiket eklenmemiş.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -21,4 +21,11 @@ public class PostRepository : GenericRepository<Post>, IPostRepository
 
         return await query.OrderByDescending(p => p.CreatedDate).ToListAsync();
     }
+    public async Task<Post?> GetPostByIdWithTagsAsync(int id)
+    {
+        return await _context.Posts
+            .Include(p => p.PostTags) // Makalenin etiket bağlarını da getir
+            .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
+    }
+
 }

@@ -1,13 +1,11 @@
 ﻿using System.Text;
-using System.Xml.Linq;
 using Blog.Core.Entities;
 using Blog.Service.Abstract;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Web.Controllers;
 
-// Bu sayede site.com/sitemap.xml yazıldığında bu Controller çalışacak
-[Route("sitemap.xml")]
+// Bu controller'ın Area'sı yoktur, tüm kullanıcılara ve arama motorlarına açıktır.
 public class SitemapController : Controller
 {
     private readonly IGenericService<Post> _postService;
@@ -19,48 +17,62 @@ public class SitemapController : Controller
         _categoryService = categoryService;
     }
 
-    [HttpGet]
+    // domain.com/sitemap.xml adresinde çalışır
+    [Route("sitemap.xml")]
     public async Task<IActionResult> Index()
     {
-        // Kendi sitenin canlı URL'sini buraya alacağız (Şimdilik Localhost)
-        string baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
 
-        // XML namespace (Google Standartları)
-        XNamespace xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9";
-        var sitemap = new XElement(xmlns + "urlset");
+        var posts = await _postService.WhereAsync(p => !p.IsDeleted && p.IsActive);
+        var categories = await _categoryService.WhereAsync(c => !c.IsDeleted);
 
-        // 1. ANA SAYFAYI EKLE
-        sitemap.Add(CreateUrlElement(xmlns, baseUrl, DateTime.Now, "1.0", "daily"));
+        var sb = new StringBuilder();
+        sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.AppendLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
 
-        // 2. KATEGORİLERİ EKLE
-        var categories = await _categoryService.WhereAsync(c => c.IsActive && !c.IsDeleted);
+        // 1. Ana Sayfa
+        sb.AppendLine($"<url><loc>{baseUrl}/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>");
+
+        // 2. Kategoriler (Öncelik: 0.8)
         foreach (var category in categories)
         {
-            string url = $"{baseUrl}/kategori/{category.Slug}";
-            sitemap.Add(CreateUrlElement(xmlns, url, category.CreatedDate, "0.8", "weekly"));
+            sb.AppendLine("<url>");
+            sb.AppendLine($"<loc>{baseUrl}/Category/{category.Slug}</loc>");
+            sb.AppendLine("<priority>0.8</priority>");
+            sb.AppendLine("<changefreq>weekly</changefreq>");
+            sb.AppendLine("</url>");
         }
 
-        // 3. YAZILARI (POSTLARI) EKLE
-        var posts = await _postService.WhereAsync(p => p.IsActive && !p.IsDeleted);
+        // 3. Makaleler (Öncelik: 0.9)
         foreach (var post in posts)
         {
-            string url = $"{baseUrl}/makale/{post.Slug}";
-            sitemap.Add(CreateUrlElement(xmlns, url, post.CreatedDate, "0.9", "monthly"));
+            sb.AppendLine("<url>");
+            sb.AppendLine($"<loc>{baseUrl}/Post/{post.Slug}</loc>");
+            // Makale güncellendiyse güncelleme tarihini, yoksa oluşturulma tarihini SEO'ya bildiriyoruz
+            sb.AppendLine($"<lastmod>{(post.UpdatedDate?.ToString("yyyy-MM-dd") ?? post.CreatedDate.ToString("yyyy-MM-dd"))}</lastmod>");
+            sb.AppendLine("<priority>0.9</priority>");
+            sb.AppendLine("<changefreq>monthly</changefreq>");
+            sb.AppendLine("</url>");
         }
 
-        // XML formatında yanıt dön (Fiziksel dosya oluşturmadan!)
-        var xml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), sitemap);
-        return Content(xml.ToString(), "application/xml", Encoding.UTF8);
+        sb.AppendLine("</urlset>");
+
+        return Content(sb.ToString(), "application/xml", Encoding.UTF8);
     }
 
-    // Tekrarı önlemek için XML Node oluşturucu yardımcı metod
-    private XElement CreateUrlElement(XNamespace xmlns, string url, DateTime lastMod, string priority, string changeFreq)
+    // domain.com/robots.txt adresinde çalışır
+    [Route("robots.txt")]
+    public IActionResult RobotsTxt()
     {
-        return new XElement(xmlns + "url",
-            new XElement(xmlns + "loc", url),
-            new XElement(xmlns + "lastmod", lastMod.ToString("yyyy-MM-ddTHH:mm:sszzz")),
-            new XElement(xmlns + "changefreq", changeFreq),
-            new XElement(xmlns + "priority", priority)
-        );
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var sb = new StringBuilder();
+
+        sb.AppendLine("User-agent: *");
+        sb.AppendLine("Allow: /");
+        sb.AppendLine("Disallow: /Admin/"); // Arama motorlarının admin paneline girmesini yasakla!
+        sb.AppendLine();
+        sb.AppendLine($"Sitemap: {baseUrl}/sitemap.xml"); // Google'a sitemap adresimizi göster
+
+        return Content(sb.ToString(), "text/plain", Encoding.UTF8);
     }
 }
