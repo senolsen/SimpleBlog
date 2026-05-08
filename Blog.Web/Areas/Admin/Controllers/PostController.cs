@@ -119,7 +119,8 @@ public class PostController : Controller
             // YENİ SEO ALANLARINI MODEL'E YÜKLÜYORUZ
             MetaTitle = post.MetaTitle,
             MetaDescription = post.MetaDescription,
-            SelectedTagIds = post.PostTags?.Select(pt => pt.TagId).ToList() ?? new List<int>()
+            SelectedTagIds = post.PostTags?.Select(pt => pt.TagId).ToList() ?? new List<int>(),
+            Status = post.Status
         };
 
         var categories = await _categoryService.WhereAsync(c => !c.IsDeleted);
@@ -195,7 +196,7 @@ public class PostController : Controller
                     post.PostTags.Add(new PostTag { TagId = tagId, PostId = post.Id });
                 }
             }
-
+            post.Status = model.Status;
             await _postService.UpdateAsync(post);
             TempData["SuccessMessage"] = "Yazı başarıyla güncellendi!";
             return RedirectToAction(nameof(Index));

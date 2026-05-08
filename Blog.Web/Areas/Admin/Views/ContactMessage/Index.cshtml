@@ -1,0 +1,61 @@
+﻿@model IEnumerable<Blog.Core.Entities.ContactMessage>
+@{
+    ViewData["Title"] = "Gelen Mesajlar";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0"><i class="fas fa-envelope me-2"></i> Gelen Mesajlar</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card card-primary card-outline">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Gönderen</th>
+                            <th>E-Posta</th>
+                            <th>Konu</th>
+                            <th>Tarih</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            // Okunmamış mesajlar için satırı vurgula
+                            var fwClass = item.IsRead ? "fw-normal" : "fw-bold text-primary";
+
+                            <tr>
+                                <td class="@fwClass">@item.Name</td>
+                                <td class="@fwClass">@item.Email</td>
+                                <td class="@fwClass">@item.Subject</td>
+                                <td class="@fwClass">@item.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white">
+                                        <i class="fas @(item.IsRead ? "fa-envelope-open" : "fa-envelope")"></i> Oku
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1 btn-delete" data-name="Bu mesaj">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i><br />
+                                    Gelen kutunuz boş.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,46 +1,34 @@
 ﻿using Blog.Core.Entities;
-using Blog.Service.Abstract;
+using Blog.Data.Context;
 using Blog.Web.Areas.Admin.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")] // Bu ayarları sadece Admin değiştirebilmeli
+[Authorize(Roles = "Admin")]
 public class SiteSettingController : Controller
 {
-    private readonly IGenericService<SiteSetting> _settingService;
-    private readonly IWebHostEnvironment _webHostEnvironment;
+    private readonly AppDbContext _context;
+    private readonly IWebHostEnvironment _env;
 
-    public SiteSettingController(IGenericService<SiteSetting> settingService, IWebHostEnvironment webHostEnvironment)
+    public SiteSettingController(AppDbContext context, IWebHostEnvironment env)
     {
-        _settingService = settingService;
-        _webHostEnvironment = webHostEnvironment;
+        _context = context;
+        _env = env;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        // Tablodaki ilk kaydı getir, yoksa yeni oluştur (Singleton mantığı)
-        var settingsList = await _settingService.GetAllAsync();
-        var setting = settingsList.FirstOrDefault();
-
-        if (setting == null)
-        {
-            setting = new SiteSetting
-            {
-                SiteTitle = "Tetraboss.com - Blog",
-                ContactAddress = "Sancaktepe, İstanbul",
-                ContactEmail = "info@tetraboss.com"
-            };
-            await _settingService.AddAsync(setting);
-        }
+        var setting = await _context.SiteSettings.FirstOrDefaultAsync() ?? new SiteSetting();
 
         var model = new SiteSettingUpdateViewModel
         {
             Id = setting.Id,
-            SiteTitle = setting.SiteTitle,
+            SiteTitle = setting.SiteTitle ?? string.Empty,
             SiteDescription = setting.SiteDescription,
             ExistingLogoPath = setting.LogoPath,
             ExistingFaviconPath = setting.FaviconPath,
@@ -52,57 +40,73 @@ public class SiteSettingController : Controller
             GithubUrl = setting.GithubUrl,
             LinkedinUrl = setting.LinkedinUrl,
             GoogleAnalyticsCode = setting.GoogleAnalyticsCode,
+            MapUrl = setting.MapUrl,
+            WorkingHours = setting.WorkingHours,
             AdsenseCode = setting.AdsenseCode,
             SidebarAdCode = setting.SidebarAdCode,
-            PostBottomAdCode = setting.PostBottomAdCode
+            PostBottomAdCode = setting.PostBottomAdCode,
+            AdsTxtContent=setting.AdsTxtContent
         };
 
         return View(model);
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Index(SiteSettingUpdateViewModel model)
+    public async Task<IActionResult> Update(SiteSettingUpdateViewModel model)
     {
-        if (ModelState.IsValid)
+        var setting = await _context.SiteSettings.FirstOrDefaultAsync();
+        if (setting == null)
         {
-            var setting = await _settingService.GetByIdAsync(model.Id);
-            if (setting == null) return NotFound();
-
-            // Dosya Yükleme (Logo)
-            if (model.LogoFile != null && model.LogoFile.Length > 0)
-            {
-                var extension = Path.GetExtension(model.LogoFile.FileName).ToLowerInvariant();
-                string uniqueFileName = "logo_" + Guid.NewGuid().ToString() + extension;
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "settings");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create)) { await model.LogoFile.CopyToAsync(fileStream); }
-
-                // Eski logoyu silme işlemi buraya eklenebilir
-                setting.LogoPath = "/uploads/settings/" + uniqueFileName;
-            }
-
-            // Temel Verileri Güncelle
-            setting.SiteTitle = model.SiteTitle;
-            setting.SiteDescription = model.SiteDescription;
-            setting.ContactEmail = model.ContactEmail;
-            setting.ContactPhone = model.ContactPhone;
-            setting.ContactAddress = model.ContactAddress;
-            setting.FacebookUrl = model.FacebookUrl;
-            setting.InstagramUrl = model.InstagramUrl;
-            setting.GithubUrl = model.GithubUrl;
-            setting.LinkedinUrl = model.LinkedinUrl;
-            setting.GoogleAnalyticsCode = model.GoogleAnalyticsCode;
-            setting.AdsenseCode = model.AdsenseCode;
-            setting.SidebarAdCode = model.SidebarAdCode;
-            setting.PostBottomAdCode = model.PostBottomAdCode;
-
-            await _settingService.UpdateAsync(setting);
-            TempData["SuccessMessage"] = "Site ayarları başarıyla güncellendi!";
-            return RedirectToAction(nameof(Index));
+            setting = new SiteSetting();
+            _context.SiteSettings.Add(setting);
         }
-        return View(model);
+
+        // --- Dosya Yükleme İşlemleri ---
+        string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "settings");
+        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+        if (model.LogoFile != null)
+        {
+            string logoName = "logo_" + Guid.NewGuid() + Path.GetExtension(model.LogoFile.FileName);
+            string logoPath = Path.Combine(uploadsFolder, logoName);
+            using (var fileStream = new FileStream(logoPath, FileMode.Create))
+            {
+                await model.LogoFile.CopyToAsync(fileStream);
+            }
+            setting.LogoPath = "/uploads/settings/" + logoName;
+        }
+
+        if (model.FaviconFile != null)
+        {
+            string faviconName = "favicon_" + Guid.NewGuid() + Path.GetExtension(model.FaviconFile.FileName);
+            string faviconPath = Path.Combine(uploadsFolder, faviconName);
+            using (var fileStream = new FileStream(faviconPath, FileMode.Create))
+            {
+                await model.FaviconFile.CopyToAsync(fileStream);
+            }
+            setting.FaviconPath = "/uploads/settings/" + faviconName;
+        }
+
+        // --- Diğer Verileri Kaydet ---
+        setting.SiteTitle = model.SiteTitle;
+        setting.SiteDescription = model.SiteDescription;
+        setting.ContactEmail = model.ContactEmail;
+        setting.ContactPhone = model.ContactPhone;
+        setting.ContactAddress = model.ContactAddress;
+        setting.FacebookUrl = model.FacebookUrl;
+        setting.InstagramUrl = model.InstagramUrl;
+        setting.GithubUrl = model.GithubUrl;
+        setting.LinkedinUrl = model.LinkedinUrl;
+        setting.GoogleAnalyticsCode = model.GoogleAnalyticsCode;
+        setting.MapUrl = model.MapUrl;
+        setting.WorkingHours = model.WorkingHours;
+        setting.AdsenseCode = model.AdsenseCode;
+        setting.SidebarAdCode = model.SidebarAdCode;
+        setting.PostBottomAdCode = model.PostBottomAdCode;
+        setting.AdsTxtContent = model.AdsTxtContent;
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Tüm ayarlar başarıyla güncellendi.";
+        return RedirectToAction(nameof(Index));
     }
 }

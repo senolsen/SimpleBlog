@@ -35,4 +35,6 @@ public class SiteSettingUpdateViewModel
     public string? AdsenseCode { get; set; }
     public string? SidebarAdCode { get; set; }
     public string? PostBottomAdCode { get; set; }
+
+    public string? AdsTxtContent { get; set; }
 }

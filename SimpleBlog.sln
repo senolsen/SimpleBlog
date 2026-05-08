@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blog.Service", "Blog.Servic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blog.Web", "Blog.Web\Blog.Web.csproj", "{82B80478-C511-480A-B349-B0BE0E82E6CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratorLicenceCode", "GeneratorLicenceCode\GeneratorLicenceCode.csproj", "{B62B20B3-DAA3-4B6A-93FD-0AC1880C75E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{82B80478-C511-480A-B349-B0BE0E82E6CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82B80478-C511-480A-B349-B0BE0E82E6CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82B80478-C511-480A-B349-B0BE0E82E6CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B62B20B3-DAA3-4B6A-93FD-0AC1880C75E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B62B20B3-DAA3-4B6A-93FD-0AC1880C75E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B62B20B3-DAA3-4B6A-93FD-0AC1880C75E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B62B20B3-DAA3-4B6A-93FD-0AC1880C75E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

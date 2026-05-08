@@ -1,0 +1,37 @@
+﻿@model Blog.Core.Entities.ContactMessage
+@{
+    ViewData["Title"] = "Mesaj Detayı";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0"><i class="fas fa-envelope-open-text me-2"></i> Mesaj Oku</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title fw-bold">@Model.Subject</h3>
+                <div class="card-tools">
+                    <span class="text-muted"><i class="far fa-clock me-1"></i> @Model.CreatedDate.ToString("dd MMMM yyyy, HH:mm")</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-4 pb-3 border-bottom">
+                    <h6 class="mb-1"><strong>Kimden:</strong> @Model.Name</h6>
+                    <h6 class="mb-0"><strong>E-Posta:</strong> <a href="mailto:@Model.Email">@Model.Email</a></h6>
+                </div>
+
+                <div class="message-content" style="min-height: 150px; font-size: 1.1rem; line-height: 1.6;">
+                    @Html.Raw(Model.Message.Replace("\n", "<br />"))
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Gelen Kutusuna Dön</a>
+                <a href="mailto:@Model.Email" class="btn btn-primary float-end"><i class="fas fa-reply me-1"></i> Yanıtla</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -20,6 +20,12 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<Tag> Tags { get; set; }
     public DbSet<PostTag> PostTags { get; set; }
 
+    // Mevcut DbSet'lerin altına ekle
+    public DbSet<ContactMessage> ContactMessages { get; set; }
+    public DbSet<License> Licenses { get; set; }
+
+    public DbSet<Page> Pages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

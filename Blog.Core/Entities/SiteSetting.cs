@@ -29,4 +29,6 @@ public class SiteSetting : BaseEntity
     public string? AdsenseCode { get; set; } // Ana AdSense scripti
     public string? SidebarAdCode { get; set; } // Yan menü reklam alanı
     public string? PostBottomAdCode { get; set; } // Yazı altı reklam alanı
+
+    public string? AdsTxtContent { get; set; }
 }

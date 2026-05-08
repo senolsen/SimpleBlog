@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Blog.Core.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace Blog.Web.Areas.Admin.Models;
@@ -24,4 +25,6 @@ public class PostEditViewModel
     public string? MetaDescription { get; set; }
 
     public List<int> SelectedTagIds { get; set; } = new List<int>();
+
+    public PostStatus Status { get; set; }
 }

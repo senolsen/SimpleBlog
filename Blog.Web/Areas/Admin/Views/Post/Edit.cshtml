@@ -1,4 +1,5 @@
-﻿@model Blog.Web.Areas.Admin.Models.PostEditViewModel
+﻿@using Blog.Core.Enums
+@model Blog.Web.Areas.Admin.Models.PostEditViewModel
 @{
     ViewData["Title"] = "Yazı Düzenle";
 }
@@ -65,6 +66,14 @@
                             @Html.Raw(Model.Content)
                         </div>
                         <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label">Yayın Durumu</label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="@PostStatus.Draft">Taslak (Yayına Almaz)</option>
+                            <option value="@PostStatus.Published">Yayında (Sitede Görünür)</option>
+                        </select>
+                        <small class="text-muted">Yazınızı hazırlamaya devam edecekseniz 'Taslak' olarak bırakın.</small>
                     </div>
                     <hr class="my-4">
                     <h5 class="text-primary mb-3"><i class="fas fa-search"></i> SEO Ayarları</h5>

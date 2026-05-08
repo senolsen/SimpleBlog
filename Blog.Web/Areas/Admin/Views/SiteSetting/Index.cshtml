@@ -11,17 +11,8 @@
 
 <div class="app-content">
     <div class="container-fluid">
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-1"></i> @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-
         <div class="card card-primary card-outline">
-            <form asp-action="Index" method="post" enctype="multipart/form-data">
+            <form asp-action="Update" method="post" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="ExistingLogoPath" />
                 <input type="hidden" asp-for="ExistingFaviconPath" />
@@ -140,6 +131,11 @@
                             <div class="mb-3">
                                 <label asp-for="PostBottomAdCode" class="form-label">Yazı Altı Reklam Kodu</label>
                                 <textarea asp-for="PostBottomAdCode" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="AdsTxtContent" class="form-label">ads.txt İçeriği</label>
+                                <textarea asp-for="AdsTxtContent" class="form-control" rows="5" placeholder="google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0"></textarea>
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> AdSense panelinden aldığınız ads.txt satırlarını buraya yapıştırın.</small>
                             </div>
                         </div>
 

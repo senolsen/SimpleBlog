@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Blog.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 namespace Blog.Web.Areas.Admin.Models;
 
 public class PostCreateViewModel
@@ -18,4 +19,6 @@ public class PostCreateViewModel
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public List<int> SelectedTagIds { get; set; } = new List<int>();
+
+    public PostStatus Status { get; set; }
 }

@@ -3,6 +3,7 @@ using Blog.Data.Context;
 using Blog.Service.Abstract;
 using Blog.Service.Concrete;
 using Blog.Web.Extensions;
+using Blog.Web.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
@@ -96,19 +97,27 @@ app.UseStaticFiles();
 
 // Middleware sýralamasý çok önemlidir, bu sýra bozulmamalýdýr
 app.UseRouting();
-
+app.UseMiddleware<AdminLicenseMiddleware>();
 app.UseAuthentication(); // Önce kimlik doðrulanýr (Giriþ yapmýþ mý?)
 app.UseAuthorization();  // Sonra yetki kontrol edilir (Admin mi?)
 
-// 8. Rota (Route) Ayarlarý
-// Admin paneli rotasý (Area)
+// 1. Önce Admin Paneli (Area) Rotalarý
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
-// Varsayýlan (Son kullanýcý / Ön yüz) rotasý
+// 2. Sonra Sitenin Standart Rotalarý (Home, Post, Login vs.)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// 3. EN ALTTA: CATCH-ALL (Her Þeyi Yakalayan) Fallback Rotasý
+// Eðer yukarýdaki hiçbir þarta uymazsa buraya düþecek!
+app.MapControllerRoute(
+    name: "DynamicPage",
+    pattern: "{slug}",
+    defaults: new { controller = "Page", action = "Detail" });
+
+app.Run();
 
 app.Run();

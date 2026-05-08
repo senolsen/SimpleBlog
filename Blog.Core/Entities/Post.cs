@@ -1,4 +1,6 @@
-﻿namespace Blog.Core.Entities;
+﻿using Blog.Core.Enums;
+
+namespace Blog.Core.Entities;
 
 public class Post : BaseEntity
 {
@@ -28,4 +30,6 @@ public class Post : BaseEntity
 
     // 3. Etiketler (Çoka-Çok ilişki bağlantısı)
     public ICollection<PostTag>? PostTags { get; set; }
+
+    public PostStatus Status { get; set; } = PostStatus.Draft;
 }
