@@ -12,58 +12,76 @@
 <div class="app-content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info rounded shadow-sm">
-                    <div class="inner p-3">
-                        <h3>@Model.TotalViews</h3>
-                        <p>@(User.IsInRole("Admin") || User.IsInRole("Editör") ? "Toplam Görüntülenme" : "Yazılarımın Okunması")</p>
-                    </div>
-                    <div class="icon" style="opacity: 0.3; right: 20px; top: 15px;">
-                        <i class="fas fa-eye fa-3x"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success rounded shadow-sm">
-                    <div class="inner p-3">
-                        <h3>@Model.TotalPosts</h3>
-                        <p>Yayınlanan Makale</p>
-                    </div>
-                    <div class="icon" style="opacity: 0.3; right: 20px; top: 15px;">
-                        <i class="fas fa-edit fa-3x"></i>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-4">
+                    <div class="card-body d-flex align-items-center p-4">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-info bg-opacity-10" style="width: 60px; height: 60px;">
+                                <i class="fas fa-eye fa-2x text-info"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted fw-semibold mb-1">
+                                @(User.IsInRole("Admin") || User.IsInRole("Editör") ? "Toplam Görüntülenme" : "Yazılarımın Okunması")
+                            </h6>
+                            <h3 class="mb-0 fw-bold text-dark">@Model.TotalViews.ToString("N0")</h3>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning rounded shadow-sm">
-                    <div class="inner p-3">
-                        <h3>@Model.TotalComments</h3>
-                        <p>Okur Yorumu</p>
-                    </div>
-                    <div class="icon" style="opacity: 0.3; right: 20px; top: 15px;">
-                        <i class="fas fa-comments fa-3x text-dark"></i>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-4">
+                    <div class="card-body d-flex align-items-center p-4">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" style="width: 60px; height: 60px;">
+                                <i class="fas fa-edit fa-2x text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted fw-semibold mb-1">Yayınlanan Makale</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@Model.TotalPosts.ToString("N0")</h3>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger rounded shadow-sm">
-                    <div class="inner p-3">
-                        <h3>@Model.TotalCategories</h3>
-                        <p>Aktif Kategori</p>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-4">
+                    <div class="card-body d-flex align-items-center p-4">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10" style="width: 60px; height: 60px;">
+                                <i class="fas fa-comments fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted fw-semibold mb-1">Okur Yorumu</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@Model.TotalComments.ToString("N0")</h3>
+                        </div>
                     </div>
-                    <div class="icon" style="opacity: 0.3; right: 20px; top: 15px;">
-                        <i class="fas fa-list fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-4">
+                    <div class="card-body d-flex align-items-center p-4">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10" style="width: 60px; height: 60px;">
+                                <i class="fas fa-list fa-2x text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted fw-semibold mb-1">Aktif Kategori</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@Model.TotalCategories.ToString("N0")</h3>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-lg-8">
-                <div class="card card-primary card-outline shadow-sm">
+            <div class="col-lg-6">
+                <div class="card card-primary card-outline shadow-sm h-100">
                     <div class="card-header border-0">
                         <h3 class="card-title fw-bold"><i class="fas fa-fire text-danger me-1"></i> En Çok Okunan 10 Makale</h3>
                     </div>
@@ -72,7 +90,6 @@
                             <thead>
                                 <tr>
                                     <th>Makale Başlığı</th>
-                                    <th class="text-center">Kategori ID</th>
                                     <th class="text-center">Okunma (Görüntülenme)</th>
                                 </tr>
                             </thead>
@@ -85,18 +102,9 @@
                                                 @post.Title
                                             </a>
                                         </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-secondary">Kategori: @post.CategoryId</span>
-                                        </td>
                                         <td class="text-center fw-bold text-success">
                                             <i class="fas fa-arrow-up me-1"></i> @post.ViewCount
                                         </td>
-                                    </tr>
-                                }
-                                @if (!Model.TopPosts.Any())
-                                {
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-3">Henüz okunma istatistiği oluşmamış.</td>
                                     </tr>
                                 }
                             </tbody>
@@ -105,13 +113,49 @@
                 </div>
             </div>
 
-            <div class="col-lg-4">
-                <div class="card card-info card-outline shadow-sm">
+            <div class="col-lg-6">
+                <div class="card card-info card-outline shadow-sm h-100">
                     <div class="card-header border-0">
-                        <h3 class="card-title fw-bold"><i class="fas fa-chart-pie text-info me-1"></i> Kategori Dağılımı</h3>
+                        <h3 class="card-title fw-bold"><i class="fas fa-chart-pie text-info me-1"></i> Popüler 10 Kategori</h3>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="position-relative w-100" style="height: 350px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card card-dark card-outline shadow-sm">
+                    <div class="card-header border-0">
+                        <h3 class="card-title fw-bold"><i class="fas fa-table me-2"></i> Kategori Bazlı İçerik Dağılımı (Tümü)</h3>
                     </div>
                     <div class="card-body">
-                        <canvas id="categoryChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        <table id="allCategoriesTable" class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Kategori Adı</th>
+                                    <th class="text-center" style="width: 250px;">Toplam Makale Sayısı</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.AllCategoryStats != null)
+                                {
+                                    foreach (var item in ViewBag.AllCategoryStats)
+                                    {
+                                        <tr>
+                                            <td><i class="fas fa-folder text-warning me-2"></i> @item.CategoryName</td>
+                                            <td class="text-center fw-bold">
+                                                <span class="badge bg-secondary p-2">@item.PostCount Makale</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -124,34 +168,42 @@
 
     <script>
         $(document).ready(function () {
-            // Controller'dan gelen verileri JavaScript dizilerine çeviriyoruz
+            // 1. GRAFİK ÇİZİMİ
             const labels = @Html.Raw(Json.Serialize(Model.ChartCategoryNames));
             const dataCounts = @Html.Raw(Json.Serialize(Model.ChartPostCounts));
 
-            // Grafik Çizimi (Pie Chart)
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut', // 'pie' da yapılabilir
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Makale Sayısı',
-                        data: dataCounts,
-                        backgroundColor: [
-                            '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', '#8e44ad', '#2c3e50'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+            if (labels && labels.length > 0) {
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataCounts,
+                            backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', '#8e44ad', '#2c3e50', '#e83e8c', '#20c997'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right', // Legend sağda durmaya devam etsin, %50 genişlikte çok şık durur
+                                labels: {
+                                    boxWidth: 12
+                                }
+                            }
                         }
                     }
-                }
+                });
+            }
+
+            // 2. TÜM KATEGORİLER TABLOSU İÇİN DATATABLES
+            $('#allCategoriesTable').DataTable({
+                "pageLength": 10,
+                "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json" },
+                "responsive": true
             });
         });
     </script>

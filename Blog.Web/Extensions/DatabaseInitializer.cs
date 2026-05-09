@@ -1,5 +1,7 @@
 ﻿using Blog.Core.Entities;
+using Blog.Core.Enums;
 using Blog.Data.Context;
+using Bogus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +18,7 @@ public static class DatabaseInitializer
         {
             var context = services.GetRequiredService<AppDbContext>();
 
-            // 1. Veritabanı yoksa oluşturur, varsa eksik migration'ları (AppUserId dahil) uygular
+            // 1. Veritabanı yoksa oluşturur, varsa eksik migration'ları uygular
             await context.Database.MigrateAsync();
             Console.WriteLine("Veritabanı başarıyla ayağa kaldırıldı.");
 
@@ -33,10 +35,8 @@ public static class DatabaseInitializer
                 }
             }
 
-            // 3. KULLANICILARI OLUŞTUR
-            // Her ihtimale karşı tüm Identity kurallarından geçen güçlü bir şifre kullanıyoruz
+            // 3. KULLANICILARI OLUŞTUR (Senin orijinal güvenli yapın)
             var defaultPassword = "Admin123!*";
-
             var users = new List<(AppUser User, string Role)>
             {
                 (new AppUser { UserName = "admin@blog.com", Email = "admin@blog.com", FirstName = "Sistem", LastName = "Yöneticisi", EmailConfirmed = true }, "Admin"),
@@ -54,85 +54,90 @@ public static class DatabaseInitializer
                         await userManager.AddToRoleAsync(u.User, u.Role);
                         Console.WriteLine($"{u.User.Email} kullanıcısı başarıyla oluşturuldu.");
                     }
-                    else
-                    {
-                        // EĞER KULLANICI OLUŞMAZSA SEBEBİNİ KONSOLA YAZDIR
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"{u.User.Email} oluşturulamadı. Hatalar:");
-                        foreach (var error in result.Errors)
-                        {
-                            Console.WriteLine($"- {error.Description}");
-                        }
-                        Console.ResetColor();
-                    }
                 }
             }
 
-            // 4. KATEGORİLERİ OLUŞTUR
+            // --- BUNDAN SONRASI BOGUS İLE 1000'ER ADET STRESS TESTİ VERİSİ ---
+
+            // Eğer veritabanında halihazırda kategori varsa tohumlamayı atla (her açılışta 1000 tane daha eklemesin)
             if (!await context.Categories.AnyAsync())
             {
-                var categories = new List<Category>
-                {
-                    new Category { Name = "ASP.NET Core", CreatedDate = DateTime.Now, IsActive = true, IsDeleted = false },
-                    new Category { Name = "Flutter", CreatedDate = DateTime.Now, IsActive = true, IsDeleted = false },
-                    new Category { Name = "Liderlik & Kariyer", CreatedDate = DateTime.Now, IsActive = true, IsDeleted = false }
-                };
+                Console.WriteLine("Bogus ile sahte veriler üretiliyor. Lütfen bekleyin...");
+
+                var faker = new Faker("tr");
+
+                // 4. 1000 ADET KATEGORİ
+                var categories = new Faker<Category>("tr")
+                    .RuleFor(c => c.Name, f => f.Commerce.Department() + " " + f.IndexGlobal)
+                    .RuleFor(c => c.Slug, (f, c) => f.Lorem.Slug())
+                    .RuleFor(c => c.IsActive, true)
+                    .RuleFor(c => c.CreatedDate, f => f.Date.Past(1))
+                    .Generate(1000);
+
                 await context.Categories.AddRangeAsync(categories);
                 await context.SaveChangesAsync();
-            }
 
-            // 5. DEMO POSTLARI (YAZILARI) OLUŞTUR
-            if (!await context.Posts.AnyAsync())
-            {
-                var aspNetKategori = await context.Categories.FirstOrDefaultAsync(c => c.Name == "ASP.NET Core");
-                var flutterKategori = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Flutter");
-                var kariyerKategori = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Liderlik & Kariyer");
+                // 5. 1000 ADET ETİKET
+                var tags = new Faker<Tag>("tr")
+                    .RuleFor(t => t.Name, f => f.Commerce.ProductAdjective() + " " + f.IndexGlobal)
+                    .RuleFor(t => t.Slug, (f, t) => f.Lorem.Slug())
+                    .RuleFor(t => t.IsActive, true)
+                    .RuleFor(t => t.CreatedDate, f => f.Date.Past(1))
+                    .Generate(1000);
 
-                var adminUser = await userManager.FindByEmailAsync("admin@blog.com");
-                var yazarUser = await userManager.FindByEmailAsync("yazar1@blog.com");
+                await context.Tags.AddRangeAsync(tags);
+                await context.SaveChangesAsync();
 
-                // Null referans hatası almamak için güvenlik kontrolü
-                if (aspNetKategori != null && flutterKategori != null && kariyerKategori != null && adminUser != null && yazarUser != null)
+                // 6. 1000 ADET SABİT SAYFA
+                var pages = new Faker<Page>("tr")
+                    .RuleFor(p => p.Title, f => f.Lorem.Sentence(3))
+                    .RuleFor(p => p.Content, f => f.Lorem.Paragraphs(5))
+                    .RuleFor(p => p.Slug, (f, p) => f.Lorem.Slug())
+                    .RuleFor(p => p.IsActive, true)
+                    .RuleFor(p => p.CreatedDate, f => f.Date.Past(1))
+                    .Generate(1000);
+
+                await context.Pages.AddRangeAsync(pages);
+                await context.SaveChangesAsync();
+
+                // 7. 1000 ADET YAZI (Rastgele Kategori ve Yazar ile)
+                var categoryIds = categories.Select(c => c.Id).ToList();
+                var userIds = new List<string>
                 {
-                    var posts = new List<Post>
-                    {
-                        new Post
-                        {
-                            Title = "ASP.NET Core ile Temiz Mimari (Clean Architecture)",
-                            Content = "<h2>Temiz Mimari Neden Önemlidir?</h2><p>Projeler büyüdükçe kodun yönetilebilirliği zorlaşır. Katmanlı mimari ve <strong>Dependency Injection</strong> kullanarak projelerinizi geleceğe hazır hale getirebilirsiniz.</p><ul><li>Core Katmanı</li><li>Data Katmanı</li><li>Service Katmanı</li></ul><p>Bu yapılar sayesinde veri tabanı bağımlılığını en aza indiririz.</p>",
-                            CategoryId = aspNetKategori.Id,
-                            AppUserId = adminUser.Id,
-                            CoverImagePath = "https://picsum.photos/seed/aspnet/800/400", // RESTGELE GÖRSEL EKLENDİ
-                            CreatedDate = DateTime.Now.AddDays(-5),
-                            IsActive = true,
-                            IsDeleted = false
-                        },
-                        new Post
-                        {
-                            Title = "Flutter ile Çapraz Platform Uygulama Geliştirme",
-                            Content = "<h2>Tek Kod, İki Platform</h2><p>Mobil uygulama dünyasında <em>Flutter</em> rüzgarı esmeye devam ediyor. Dart dili ile yazılan widget mimarisi sayesinde hem iOS hem de Android için harika arayüzler tasarlamak çok kolay.</p><p>State Management (Durum Yönetimi) konusunda Riverpod veya Provider tercih edilebilir.</p>",
-                            CategoryId = flutterKategori.Id,
-                            AppUserId = yazarUser.Id,
-                            CoverImagePath = "https://picsum.photos/seed/flutter/800/400", // RESTGELE GÖRSEL EKLENDİ
-                            CreatedDate = DateTime.Now.AddDays(-2),
-                            IsActive = true,
-                            IsDeleted = false
-                        },
-                        new Post
-                        {
-                            Title = "Başarılı Bir Yazılım Ekip Lideri Olmanın Sırları",
-                            Content = "<h2>Ekibi Yönetmek Değil, Yönlendirmek</h2><p>İyi bir yazılım ekip lideri, sadece kod kalitesiyle değil, ekibin motivasyonuyla da ilgilenmelidir.</p><ol><li>Agile metodolojilerini doğru uygulamak</li><li>Kod inceleme (Code Review) süreçlerini adil yürütmek</li><li>Teknik borçları zamanında ödemek</li></ol><blockquote><p>\"İyi liderler başarıyı paylaşır, başarısızlığı sahiplenir.\"</p></blockquote>",
-                            CategoryId = kariyerKategori.Id,
-                            AppUserId = yazarUser.Id,
-                            CoverImagePath = "https://picsum.photos/seed/kariyer/800/400", // RESTGELE GÖRSEL EKLENDİ
-                            CreatedDate = DateTime.Now.AddDays(-1),
-                            IsActive = true,
-                            IsDeleted = false
-                        }
-                    };
-                    await context.Posts.AddRangeAsync(posts);
-                    await context.SaveChangesAsync();
-                }
+                    (await userManager.FindByEmailAsync("admin@blog.com")).Id,
+                    (await userManager.FindByEmailAsync("yazar1@blog.com")).Id
+                };
+
+                var posts = new Faker<Post>("tr")
+                    .RuleFor(p => p.Title, f => f.Lorem.Sentence(5))
+                    .RuleFor(p => p.Content, f => f.Lorem.Paragraphs(8))
+                    .RuleFor(p => p.Slug, (f, p) => f.Lorem.Slug())
+                    .RuleFor(p => p.CategoryId, f => f.PickRandom(categoryIds))
+                    .RuleFor(p => p.AppUserId, f => f.PickRandom(userIds))
+                    .RuleFor(p => p.ViewCount, f => f.Random.Number(10, 5000))
+                    .RuleFor(p => p.Status, PostStatus.Published)
+                    .RuleFor(p => p.CreatedDate, f => f.Date.Past(1))
+                    .RuleFor(p => p.CoverImagePath, f => $"https://picsum.photos/seed/{f.Random.AlphaNumeric(10)}/800/400")
+                    .Generate(1000);
+
+                await context.Posts.AddRangeAsync(posts);
+                await context.SaveChangesAsync();
+
+                // 8. 1000 ADET YORUM
+                var postIds = posts.Select(p => p.Id).ToList();
+                var comments = new Faker<Comment>("tr")
+                    .RuleFor(c => c.Name, f => f.Name.FullName())
+                    .RuleFor(c => c.Email, f => f.Internet.Email())
+                    .RuleFor(c => c.Content, f => f.Lorem.Paragraph())
+                    .RuleFor(c => c.PostId, f => f.PickRandom(postIds))
+                    .RuleFor(c => c.IsApproved, f => f.Random.Bool())
+                    .RuleFor(c => c.CreatedDate, f => f.Date.Past(1))
+                    .Generate(1000);
+
+                await context.Comments.AddRangeAsync(comments);
+                await context.SaveChangesAsync();
+
+                Console.WriteLine("Tüm sahte veriler başarıyla veritabanına işlendi!");
             }
         }
         catch (Exception ex)

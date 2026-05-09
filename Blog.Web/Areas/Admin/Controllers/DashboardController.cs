@@ -42,25 +42,30 @@ public class DashboardController : Controller
             commentsQuery = commentsQuery.Where(c => userPostIds.Contains(c.PostId)).ToList();
         }
 
-        // 2. Kategori Dağılımını Hesapla
-        var categoryNames = new List<string>();
-        var postCounts = new List<int>();
-
-        foreach (var cat in categories)
-        {
-            var count = postsQuery.Count(p => p.CategoryId == cat.Id);
-            if (count > 0) // Sadece içinde yazı olan kategorileri grafikte göster
+        // 2. Kategori Dağılımını Hesapla (En Popüler İlk 10 Kategori)
+        var topCategoryStats = categories
+            .Select(cat => new
             {
-                categoryNames.Add(cat.Name);
-                postCounts.Add(count);
-            }
-        }
+                CategoryName = cat.Name,
+                PostCount = postsQuery.Count(p => p.CategoryId == cat.Id)
+            })
+            .Where(x => x.PostCount > 0) // Hiç yazısı olmayanları ele
+            .OrderByDescending(x => x.PostCount) // Yazı sayısına göre büyükten küçüğe sırala
+            .Take(10) // Sadece ilk 10'u al!
+            .ToList();
+
+        // Senin ViewModel'in beklediği formatta listeleri oluşturuyoruz
+        var categoryNames = topCategoryStats.Select(x => x.CategoryName).ToList();
+        var postCounts = topCategoryStats.Select(x => x.PostCount).ToList();
+
+        // Ön taraftaki (View) tablo için veriyi ViewBag içine atıyoruz
+        ViewBag.TopCategories = topCategoryStats;
 
         // 3. Modeli Doldur
         var model = new DashboardViewModel
         {
             TotalPosts = postsQuery.Count(),
-            TotalCategories = categories.Count(), // Bu bilgi genel kalabilir veya yazarın kullandığı kategoriler yapılabilir
+            TotalCategories = categories.Count(),
             TotalComments = commentsQuery.Count(),
             TotalViews = postsQuery.Sum(p => p.ViewCount),
 
@@ -69,6 +74,18 @@ public class DashboardController : Controller
             ChartCategoryNames = categoryNames,
             ChartPostCounts = postCounts
         };
+
+        // 4. TÜM KATEGORİLERİN LİSTESİ (Tablo İçin)
+        var allCategoryStats = categories
+            .Select(cat => new
+            {
+                CategoryName = cat.Name,
+                PostCount = postsQuery.Count(p => p.CategoryId == cat.Id)
+            })
+            .OrderByDescending(x => x.PostCount) // En çok yazısı olandan başlayarak sırala
+            .ToList();
+
+        ViewBag.AllCategoryStats = allCategoryStats;
 
         return View(model);
     }

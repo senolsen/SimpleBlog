@@ -16,7 +16,7 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover jetex-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -32,13 +32,25 @@
                                 <td>@item.Id</td>
                                 <td>@item.Name</td>
                                 <td>@item.CreatedDate.ToShortDateString()</td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i> Düzenle
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger btn-delete" data-name="@item.Name adlı kategori">
-                                        <i class="fas fa-trash"></i> Sil
-                                    </a>
+                                <td class="text-end px-3">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm border shadow-sm px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="İşlemler">
+                                            <i class="fas fa-ellipsis-v text-muted"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-action="Edit" asp-route-id="@item.Id">
+                                                    <i class="fas fa-edit text-primary me-2"></i> Düzenle
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item py-2 text-danger btn-delete" asp-action="Delete" asp-route-id="@item.Id">
+                                                    <i class="fas fa-trash-alt me-2"></i> Sil
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         }

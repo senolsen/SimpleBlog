@@ -109,9 +109,20 @@
             @RenderBody()
         </main>
 
-        <footer class="app-footer">
-            <div class="float-end d-none d-sm-inline">v1.0.0</div>
-            <strong>Copyright &copy; @DateTime.Now.Year <a href="#">Blog Projesi</a>.</strong> Tüm hakları saklıdır.
+        <footer class="app-footer border-top bg-white mt-4">
+            <div class="float-end d-none d-sm-inline text-muted">
+                <i class="fas fa-code-branch me-1 text-info"></i>
+                <span class="fw-bold text-dark">Jetexsoft Blog Sistemi</span>
+                <span class="badge bg-light text-dark border ms-1">v1.0.0</span>
+            </div>
+
+            <strong>
+                Copyright &copy; @DateTime.Now.Year
+                <a href="https://jetexsoft.com.tr" target="_blank" class="text-decoration-none fw-bold text-primary">
+                    Jetexsoft
+                </a>.
+            </strong>
+            <span class="text-muted">Tüm hakları saklıdır.</span>
         </footer>
     </div>
 
@@ -120,7 +131,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/js/adminlte.min.js"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -172,5 +182,104 @@
             });
         </script>
     }
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.jetex-table').DataTable({
+                // 1. TAMAMEN TEMİZ VE KONTROLLÜ TÜRKÇE DİL DESTEĞİ
+                "language": {
+                    "emptyTable": "Tabloda herhangi bir kayıt bulunamadı.",
+                    "info": "Toplam _TOTAL_ kayıttan _START_ ile _END_ arası gösteriliyor",
+                    "infoEmpty": "Kayıt yok",
+                    "infoFiltered": "(_MAX_ kayıt içerisinden filtrelendi)",
+                    "lengthMenu": "_MENU_ kayıt göster",
+                    "loadingRecords": "Yükleniyor...",
+                    "processing": "İşleniyor...",
+                    "search": "Ara:",
+                    "zeroRecords": "Eşleşen kayıt bulunamadı",
+                    "paginate": {
+                        "first": "İlk",
+                        "last": "Son",
+                        "next": "Sonraki",
+                        "previous": "Önceki"
+                    }
+                },
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+
+                // 2. MÜKEMMEL UI YERLEŞİMİ İÇİN DOM AYARI (Arama ve Sayfalama kısımlarına p-3 ile boşluk verdik)
+                "dom": "<'row p-3 pb-0'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row p-3 pt-2'<'col-sm-12 col-md-5 text-muted'i><'col-sm-12 col-md-7'p>>"
+            });
+        });
+    </script>
+    <script>
+        // Sistemdeki tüm 'btn-delete' sınıfına sahip butonları dinle
+        $(document).on('click', '.btn-delete', function (e) {
+            e.preventDefault(); // Linkin sayfayı yenilemesini (yönlendirmeyi) durdur
+
+            var url = $(this).attr('href'); // Gidilecek silme adresini al
+            var tr = $(this).closest('tr'); // Tıklanan butonun bulunduğu <tr> satırını yakala
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu kayıt kalıcı olarak silinecektir ve bu işlem geri alınamaz!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash-alt me-1"></i> Evet, Sil!',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    // AJAX ile arka planda sessizce silme isteğini gönder
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function () {
+                            // İşlem başarılıysa DataTables objesini bul
+                            var table = $('.jetex-table').DataTable();
+
+                            // İlgili satırı tablodan sil ve tabloyu yeniden çiz
+                            // (İçindeki 'false' parametresi, kullanıcının bulunduğu sayfayı değiştirmemesini sağlar)
+                            table.row(tr).remove().draw(false);
+
+                            // Ekranın ortasında değil, sağ üstte zarif bir "Toast" bildirimi çıkar
+                            Swal.fire({
+                                title: 'Başarılı!',
+                                text: 'Kayıt kalıcı olarak silindi.',
+                                icon: 'success',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        },
+                        error: function () {
+                            // Eğer C# tarafında (veritabanında) bir hata olursa uyarı ver
+                            Swal.fire('Hata!', 'İşlem sırasında sunucuda bir sorun oluştu.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

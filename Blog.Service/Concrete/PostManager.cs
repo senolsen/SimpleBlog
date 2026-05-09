@@ -47,9 +47,36 @@ public class PostManager : GenericManager<Post>, IPostService
             _repository.Update(post);
             await _unitOfWork.CommitAsync();
 
-            // Not: Normalde UpdateAsync metodumuzda cache'i siliyorduk. 
-            // Ancak her sayfa okunmasında tüm Cache'i patlatmak performansı mahveder.
-            // Bu yüzden sadece sayacı artırıp, Global Cache'e dokunmuyoruz.
+            // Not: Sadece sayacı artırıp, Global Cache'e dokunmuyoruz.
+        }
+    }
+
+    public virtual async Task AddAsync(Post entity)
+    {
+        await base.AddAsync(entity); // Asıl kayıt işlemini yap
+        ClearCustomCache(entity.AppUserId); // Sonra özel önbelleğimizi çöpe at
+    }
+
+    public virtual async Task UpdateAsync(Post entity)
+    {
+        await base.UpdateAsync(entity);
+        ClearCustomCache(entity.AppUserId);
+    }
+
+    public virtual async Task RemoveAsync(Post entity)
+    {
+        await base.RemoveAsync(entity);
+        ClearCustomCache(entity.AppUserId);
+    }
+
+    // Sadece bu sınıfa özel ürettiğimiz önbellek anahtarlarını silen yardımcı metot
+    private void ClearCustomCache(string? userId)
+    {
+        _memoryCache.Remove("PostsWithCategory_All");
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            _memoryCache.Remove($"PostsWithCategory_{userId}");
         }
     }
 }
