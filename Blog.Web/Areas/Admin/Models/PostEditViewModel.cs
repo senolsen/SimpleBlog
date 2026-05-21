@@ -24,7 +24,7 @@ public class PostEditViewModel
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
 
-    public List<int> SelectedTagIds { get; set; } = new List<int>();
+    public List<string> SelectedTags { get; set; } = new List<string>();
 
     public PostStatus Status { get; set; }
 }

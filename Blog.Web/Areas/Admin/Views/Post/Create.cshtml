@@ -31,8 +31,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-tags text-warning"></i> Etiketler</label>
-                        <select asp-for="SelectedTagIds" asp-items="ViewBag.Tags" class="form-control select2" multiple="multiple" data-placeholder="Etiket seçin veya arayın...">
-                        </select>
+                        <select asp-for="SelectedTags" asp-items="ViewBag.Tags" class="form-control select2" multiple="multiple"></select>
                         <small class="text-muted">Aramak için yazın, birden fazla etiket seçebilirsiniz.</small>
                     </div>
                     <div class="mb-3">
@@ -89,47 +88,84 @@
 @section Scripts {
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-
-    <script>
-        // Quill Editörünü Başlatıyoruz
-        var quill = new Quill('#quillEditor', {
-            theme: 'snow',
-            placeholder: 'Yazı içeriğini buraya girin...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['link', 'clean']
-                ]
-            }
-        });
-
-        // Form gönderilirken (Submit) çalışacak olay
-        var form = document.getElementById('postForm');
-        form.onsubmit = function() {
-            var hiddenContent = document.getElementById('hiddenContent');
-            // Editörün içindeki HTML formatlı metni gizli input'a aktar
-            hiddenContent.value = quill.root.innerHTML;
-        };
-    </script>
-
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            // Select2 eklentisini aktif et
-            $('.select2').select2({
-                theme: "classic",
-                width: '100%',
-                language: {
-                    noResults: function () {
-                        return "Etiket bulunamadı.";
+        // 1. Özel Resim Yükleme Fonksiyonu
+        function selectLocalImage() {
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+
+            input.onchange = () => {
+                const file = input.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    $.ajax({
+                        url: '/Admin/Post/UploadEditorImage',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                // Başarılıysa resmi imlecin olduğu yere ekle
+                                const range = quill.getSelection(true);
+                                quill.insertEmbed(range.index, 'image', response.url);
+                                quill.setSelection(range.index + 1);
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Resim yüklenirken sunucu hatası oluştu.');
+                        }
+                    });
+                }
+            };
+        }
+
+        // 2. Quill Editörünü Başlatıyoruz
+        var quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            placeholder: 'Yazı içeriğini buraya girin...',
+            modules: {
+                toolbar: {
+                    container: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link', 'image', 'clean'] // 'image' buraya eklendi
+                    ],
+                    handlers: {
+                        // Resim butonuna basılınca standart Base64 yerine bizim fonksiyonu çalıştır!
+                        image: selectLocalImage
                     }
                 }
+            }
+        });
+
+        // 3. Form gönderilirken HTML'i aktar
+        var form = document.getElementById('postForm');
+        form.onsubmit = function() {
+            var hiddenContent = document.getElementById('hiddenContent');
+            hiddenContent.value = quill.root.innerHTML;
+        };
+
+        // 4. Select2 Başlatma
+        $(document).ready(function() {
+            $('.select2').select2({
+                tags: true,
+                tokenSeparators: [',', ' '],
+                placeholder: "Listeden seçin veya yeni yazıp Enter'a basın...",
+                allowClear: true,
+                width: '100%'
             });
         });
     </script>

@@ -55,9 +55,9 @@
                                 </td>
                                 <td class="text-end px-3">
                                     <div class="dropdown">
-                                        <a href="#" class="text-muted p-2" data-bs-toggle="dropdown" aria-expanded="false" title="İşlemler">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </a>
+                                        <button class="btn btn-light btn-sm border shadow-sm px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="İşlemler">
+                                            <i class="fas fa-ellipsis-v text-muted"></i>
+                                        </button>
 
                                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
 
@@ -85,7 +85,7 @@
                                             <li><hr class="dropdown-divider"></li>
 
                                             <li>
-                                                <a class="dropdown-item py-2 text-danger" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('Bu yorumu tamamen silmek istediğinize emin misiniz?');">
+                                                <a class="dropdown-item py-2 text-danger btn-delete" asp-action="Delete" asp-route-id="@item.Id">
                                                     <i class="fas fa-trash-alt me-2"></i> Kalıcı Olarak Sil
                                                 </a>
                                             </li>

@@ -94,18 +94,25 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @{
+                                    int postIndex = 0;
+                                }
                                 @foreach (var post in Model.TopPosts)
                                 {
+                                    // Burası DataTables kullanmadığı için C# ile renklendirme kusursuz çalışıyor
+                                    var textColorClass = (postIndex % 2 == 0) ? "text-success" : "text-info";
+
                                     <tr>
                                         <td>
                                             <a href="/Post/@post.Slug" target="_blank" class="text-dark fw-semibold text-decoration-none">
                                                 @post.Title
                                             </a>
                                         </td>
-                                        <td class="text-center fw-bold text-success">
+                                        <td class="text-center fw-bold @textColorClass">
                                             <i class="fas fa-arrow-up me-1"></i> @post.ViewCount
                                         </td>
                                     </tr>
+                                    postIndex++;
                                 }
                             </tbody>
                         </table>
@@ -133,8 +140,8 @@
                     <div class="card-header border-0">
                         <h3 class="card-title fw-bold"><i class="fas fa-table me-2"></i> Kategori Bazlı İçerik Dağılımı (Tümü)</h3>
                     </div>
-                    <div class="card-body">
-                        <table id="allCategoriesTable" class="table table-bordered table-hover">
+                    <div class="card-body table-responsive">
+                        <table id="allCategoriesTable" class="table table-bordered table-hover table-striped text-nowrap">
                             <thead class="table-light">
                                 <tr>
                                     <th>Kategori Adı</th>
@@ -149,7 +156,7 @@
                                         <tr>
                                             <td><i class="fas fa-folder text-warning me-2"></i> @item.CategoryName</td>
                                             <td class="text-center fw-bold">
-                                                <span class="badge bg-secondary p-2">@item.PostCount Makale</span>
+                                                <span class="badge dynamic-badge p-2 shadow-sm">@item.PostCount Makale</span>
                                             </td>
                                         </tr>
                                     }
@@ -165,6 +172,7 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <script>
         $(document).ready(function () {
@@ -176,6 +184,7 @@
                 const ctx = document.getElementById('categoryChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'doughnut',
+                    plugins: [ChartDataLabels],
                     data: {
                         labels: labels,
                         datasets: [{
@@ -189,9 +198,24 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'right', // Legend sağda durmaya devam etsin, %50 genişlikte çok şık durur
+                                position: 'right',
                                 labels: {
                                     boxWidth: 12
+                                }
+                            },
+                            datalabels: {
+                                color: '#ffffff',
+                                textAlign: 'center',
+                                font: {
+                                    weight: 'bold',
+                                    size: 10
+                                },
+                                formatter: function(value, context) {
+                                    let categoryName = context.chart.data.labels[context.dataIndex];
+                                    if (categoryName.length > 12) {
+                                        categoryName = categoryName.substring(0, 12) + '...';
+                                    }
+                                    return [categoryName, value + ' Makale'];
                                 }
                             }
                         }
@@ -199,11 +223,26 @@
                 });
             }
 
-            // 2. TÜM KATEGORİLER TABLOSU İÇİN DATATABLES
+            // 2. TÜM KATEGORİLER TABLOSU İÇİN DATATABLES (AKILLI RENKLENDİRME İLE)
             $('#allCategoriesTable').DataTable({
                 "pageLength": 10,
                 "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json" },
-                "responsive": true
+                "responsive": true,
+                // İŞTE SİHİRLİ KOD BURASI: Tablo her çizildiğinde/sıralandığında çalışır
+                "drawCallback": function( settings ) {
+                    var api = this.api();
+                    // Sadece ekrandaki satırları dön ve sırayla renkleri bas
+                    api.rows({page:'current'}).nodes().each(function(row, i) {
+                        var badge = $(row).find('.dynamic-badge');
+                        badge.removeClass('bg-success bg-info'); // Önceki renkleri temizle
+
+                        if (i % 2 === 0) {
+                            badge.addClass('bg-success'); // Çift sıralar Yeşil
+                        } else {
+                            badge.addClass('bg-info');    // Tek sıralar Mavi
+                        }
+                    });
+                }
             });
         });
     </script>
