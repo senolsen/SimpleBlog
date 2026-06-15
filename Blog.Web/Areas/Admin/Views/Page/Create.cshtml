@@ -22,9 +22,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Sayfa İçeriği</label>
-                        <input type="hidden" asp-for="Content" id="hiddenContent">
-
-                        <div id="quillEditor" style="height: 350px; background-color: #fff;"></div>
+                        <textarea asp-for="Content" class="form-control summernote-editor"></textarea>
                         <span asp-validation-for="Content" class="text-danger"></span>
                     </div>
 
@@ -41,34 +39,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-
-    <script>
-        // Quill Editörünü Başlatıyoruz
-        var quill = new Quill('#quillEditor', {
-            theme: 'snow',
-            placeholder: 'Sayfa içeriğini buraya girin...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['link', 'clean']
-                ]
-            }
-        });
-
-        // Form gönderilirken (Submit) çalışacak olay
-        var form = document.getElementById('pageForm');
-        form.onsubmit = function() {
-            var hiddenContent = document.getElementById('hiddenContent');
-            // Editörün içindeki HTML formatlı metni gizli input'a aktar
-            hiddenContent.value = quill.root.innerHTML;
-        };
-    </script>
-}

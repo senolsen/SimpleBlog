@@ -1,0 +1,134 @@
+﻿@model IEnumerable<Blog.Core.Entities.Post>
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    ViewData["MetaDescription"] = "Jetexsoft ile yazılım, teknoloji ve iş dünyasına dair en güncel makaleler.";
+}
+
+<section id="posts" class="posts">
+    <div class="container" data-aos="fade-up">
+        <div class="row g-5">
+
+            <div class="col-lg-8">
+                <h3 class="aside-title mb-4 mt-5">En Güncel Yazılar</h3>
+
+                <div class="row g-4">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var post in Model)
+                        {
+                            <div class="col-md-6">
+                                <div class="post-entry-1">
+                                    <a href="/Makale/@post.Slug">
+                                        @if (!string.IsNullOrEmpty(post.CoverImagePath))
+                                        {
+                                            <img src="@post.CoverImagePath" alt="@post.Title" class="img-fluid rounded" style="width: 100%; height: 250px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <img src="~/themes/zenblog/assets/img/post-landscape-1.jpg" alt="Varsayılan" class="img-fluid rounded" style="width: 100%; height: 250px; object-fit: cover;">
+                                        }
+                                    </a>
+                                    <div class="post-meta mt-3">
+                                        <span class="date text-uppercase" style="color: var(--color-primary); font-weight: 600;">@post.Category?.Name</span>
+                                        <span class="mx-1 text-muted">&bullet;</span>
+                                        <span class="text-muted">@post.CreatedDate.ToString("dd MMM yyyy")</span>
+                                    </div>
+                                    <h2 class="mt-2"><a href="/Makale/@post.Slug" class="text-dark hover-primary">@post.Title</a></h2>
+                                    <p class="mb-4 d-block text-muted">
+                                        @if (!string.IsNullOrEmpty(post.MetaDescription))
+                                        {
+                                            @post.MetaDescription
+                                        }
+                                        else
+                                        {
+                                            var textContent = System.Text.RegularExpressions.Regex.Replace(post.Content, "<.*?>", String.Empty);
+                                            @(textContent.Length > 100 ? textContent.Substring(0, 100) + "..." : textContent)
+                                        }
+                                    </p>
+                                    <div class="d-flex align-items-center author mt-auto">
+                                        <div class="photo"><i class="bi bi-person-circle fs-3 text-secondary"></i></div>
+                                        <div class="name">
+                                            <h3 class="m-0 p-0 fs-6">Jetexsoft Editör</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12 text-center py-5">
+                            <h4 class="text-muted">Henüz yayınlanmış bir makale bulunmuyor.</h4>
+                        </div>
+                    }
+                </div>
+
+                @if (ViewBag.TotalPages > 1)
+                {
+                    int currentPage = ViewBag.CurrentPage ?? 1;
+                    int totalPages = ViewBag.TotalPages;
+
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+
+                    <nav class="mt-5 border-top pt-4">
+                        <ul class="pagination justify-content-center">
+
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link text-dark shadow-sm rounded-circle mx-1" href="/?page=@(currentPage - 1)" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link mx-1 rounded-circle shadow-sm text-dark bg-light" href="/?page=1">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled"><span class="page-link mx-1 border-0 bg-transparent text-muted">...</span></li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(currentPage == i ? "active" : "")">
+                                    <a class="page-link mx-1 rounded-circle shadow-sm @(currentPage == i ? "bg-dark border-dark text-white fw-bold" : "text-dark bg-light")" href="/?page=@i">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            @if (endPage < totalPages)
+                            {
+                                @if (endPage < totalPages - 1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link mx-1 border-0 bg-transparent text-muted">...</span></li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link mx-1 rounded-circle shadow-sm text-dark bg-light" href="/?page=@totalPages">@totalPages</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link text-dark shadow-sm rounded-circle mx-1" href="/?page=@(currentPage + 1)" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                }
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sidebar ps-lg-4">
+                    @await Component.InvokeAsync("SidebarCategories")
+                    @await Component.InvokeAsync("SidebarPopularPosts")
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

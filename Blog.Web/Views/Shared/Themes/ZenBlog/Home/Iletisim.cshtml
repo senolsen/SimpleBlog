@@ -1,0 +1,99 @@
+﻿@model Blog.Core.Entities.SiteSetting
+@{
+    ViewData["Title"] = "İletişim";
+    ViewData["MetaDescription"] = "Proje fikirleriniz, sorularınız veya işbirlikleri için Jetexsoft ile iletişime geçin.";
+}
+
+<div class="page-title">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">İletişim</h1>
+        <nav class="breadcrumbs">
+            <ol>
+                <li><a href="/">Ana Sayfa</a></li>
+                <li class="current">İletişim</li>
+            </ol>
+        </nav>
+    </div>
+</div><section id="contact" class="contact">
+    <div class="container" data-aos="fade-up">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success text-center mb-4 fw-bold">
+                <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger text-center mb-4 fw-bold">
+                <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="row mb-5 mt-3 text-center">
+            <div class="col-12">
+                <h3 class="fw-bold mb-3" style="color: var(--color-primary);">Bizimle İletişime Geçin</h3>
+                <p class="text-muted fs-5">Soru, görüş ve proje fikirleriniz için iletişime geçin.</p>
+            </div>
+        </div>
+
+
+        <div class="mb-5">
+            @if (!string.IsNullOrEmpty(Model?.MapUrl))
+            {
+                <iframe style="border:0; width: 100%; height: 350px;" src="@Model.MapUrl" frameborder="0" allowfullscreen></iframe>
+            }
+           
+        </div>
+        
+        
+        <div class="row gy-4">
+
+            <div class="col-md-4">
+                
+                <div class="info-item d-flex">
+                    <i class="bi bi-geo-alt flex-shrink-0"></i>
+                    <div>
+                        <h4>Adres</h4>
+                        <p>@(Model?.ContactAddress ?? "Türkiye")</p>
+                    </div>
+                </div><div class="info-item d-flex">
+                    <i class="bi bi-telephone flex-shrink-0"></i>
+                    <div>
+                        <h4>Bizi Arayın</h4>
+                        <p>@(Model?.ContactPhone ?? "+90 541 394 08 10")</p>
+                    </div>
+                </div><div class="info-item d-flex">
+                    <i class="bi bi-envelope flex-shrink-0"></i>
+                    <div>
+                        <h4>E-Posta</h4>
+                        <p>@(Model?.ContactEmail ?? "info@jetexsoft.com")</p>
+                    </div>
+                </div></div>
+
+            <div class="col-md-8">
+                <form action="/Iletisim" method="post" role="form" class="php-email-form">
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <input type="text" name="Name" class="form-control" id="name" placeholder="Adınız Soyadınız" required />
+                        </div>
+                        <div class="col-md-6 form-group mt-3 mt-md-0">
+                            <input type="email" class="form-control" name="Email" id="email" placeholder="E-Posta Adresiniz" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <input type="text" class="form-control" name="Subject" id="subject" placeholder="Konu" required />
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <textarea class="form-control" name="Message" rows="5" placeholder="Mesajınız..." required></textarea>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit">Mesajı Gönder</button>
+                    </div>
+
+                </form>
+            </div>

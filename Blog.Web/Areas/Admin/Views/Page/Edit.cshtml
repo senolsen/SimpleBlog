@@ -23,9 +23,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Sayfa İçeriği</label>
-                        <input type="hidden" asp-for="Content" id="hiddenContent">
-
-                        <div id="quillEditor" style="height: 350px; background-color: #fff;">@Html.Raw(Model.Content)</div>
+                        <textarea asp-for="Content" class="form-control summernote-editor"></textarea>
                         <span asp-validation-for="Content" class="text-danger"></span>
                     </div>
 
@@ -43,30 +41,6 @@
     </div>
 </div>
 
-@section Scripts {
-    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-
-    <script>
-        var quill = new Quill('#quillEditor', {
-            theme: 'snow',
-            placeholder: 'Sayfa içeriğini buraya girin...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['link', 'clean']
-                ]
-            }
-        });
-
-        var form = document.getElementById('pageForm');
-        form.onsubmit = function() {
-            var hiddenContent = document.getElementById('hiddenContent');
-            hiddenContent.value = quill.root.innerHTML;
-        };
-    </script>
-}
+@* Not: @section Scripts alanı tamamen silindi çünkü eski Quill.js kütüphanelerine ihtiyacımız kalmadı. 
+    Summernote kütüphaneleri Layout üzerinden otomatik yüklenip "summernote-editor" class'ını bulacaktır.
+*@

@@ -33,11 +33,13 @@
                         </select>
                         <span asp-validation-for="CategoryId" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-tags text-warning"></i> Etiketler</label>
                         <select asp-for="SelectedTags" asp-items="ViewBag.Tags" class="form-control select2" multiple="multiple"></select>
                         <small class="text-muted">Aramak için yazın, birden fazla etiket seçebilirsiniz.</small>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label d-block">Mevcut Kapak Fotoğrafı</label>
                         @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
@@ -58,14 +60,10 @@
 
                     <div class="mb-3">
                         <label class="form-label">İçerik</label>
-
-                        <input type="hidden" asp-for="Content" id="hiddenContent">
-
-                        <div id="quillEditor" style="height: 350px; background-color: #fff;">
-                            @Html.Raw(Model.Content)
-                        </div>
+                        <textarea asp-for="Content" class="form-control summernote-post-editor"></textarea>
                         <span asp-validation-for="Content" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="Status" class="form-label">Yayın Durumu</label>
                         <select asp-for="Status" class="form-select">
@@ -74,6 +72,7 @@
                         </select>
                         <small class="text-muted">Yazınızı hazırlamaya devam edecekseniz 'Taslak' olarak bırakın.</small>
                     </div>
+
                     <hr class="my-4">
                     <h5 class="text-primary mb-3"><i class="fas fa-search"></i> SEO Ayarları</h5>
 
@@ -102,79 +101,13 @@
 </div>
 
 @section Scripts {
-    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        // 1. Özel Resim Yükleme Fonksiyonu
-        function selectLocalImage() {
-            const input = document.createElement('input');
-            input.setAttribute('type', 'file');
-            input.setAttribute('accept', 'image/*');
-            input.click();
-
-            input.onchange = () => {
-                const file = input.files[0];
-                if (file) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-
-                    $.ajax({
-                        url: '/Admin/Post/UploadEditorImage',
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            if (response.success) {
-                                // Başarılıysa resmi imlecin olduğu yere ekle
-                                const range = quill.getSelection(true);
-                                quill.insertEmbed(range.index, 'image', response.url);
-                                quill.setSelection(range.index + 1);
-                            } else {
-                                alert(response.message);
-                            }
-                        },
-                        error: function() {
-                            alert('Resim yüklenirken sunucu hatası oluştu.');
-                        }
-                    });
-                }
-            };
-        }
-
-        // 2. Quill Editörünü Başlatıyoruz
-        var quill = new Quill('#quillEditor', {
-            theme: 'snow',
-            modules: {
-                toolbar: {
-                    container: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote', 'code-block'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        ['link', 'image', 'clean'] // 'image' buraya eklendi
-                    ],
-                    handlers: {
-                        // Resim butonuna basılınca standart Base64 yerine bizim fonksiyonu çalıştır!
-                        image: selectLocalImage
-                    }
-                }
-            }
-        });
-
-        // 3. Form gönderilirken HTML'i aktar
-        var form = document.getElementById('editForm');
-        form.onsubmit = function() {
-            var hiddenContent = document.getElementById('hiddenContent');
-            hiddenContent.value = quill.root.innerHTML;
-        };
-
-        // 4. Select2 Başlatma
         $(document).ready(function() {
+
+            // 1. Select2 Başlatma
             $('.select2').select2({
                 tags: true,
                 tokenSeparators: [',', ' '],
@@ -182,6 +115,55 @@
                 allowClear: true,
                 width: '100%'
             });
+
+            // 2. Makale İçeriği için Özel AJAX Resim Yüklemeli Summernote
+            $('.summernote-post-editor').summernote({
+                height: 400,
+                placeholder: 'Yazı içeriğini buraya girin...',
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                callbacks: {
+                    // Resim ekle butonuna basıldığında veya resim sürüklendiğinde tetiklenir
+                    onImageUpload: function(files) {
+                        for (let i = 0; i < files.length; i++) {
+                            uploadImageToController(files[i], this);
+                        }
+                    }
+                }
+            });
+
+            // 3. Özel Resim Yükleme (Senin AJAX C# uç noktana bağlanır)
+            function uploadImageToController(file, editor) {
+                var formData = new FormData();
+                formData.append("file", file);
+
+                $.ajax({
+                    url: '/Admin/Post/UploadEditorImage',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Başarılıysa resmi Summernote içine yerleştir
+                            $(editor).summernote('insertImage', response.url);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Resim yüklenirken sunucu hatası oluştu.');
+                    }
+                });
+            }
+
         });
     </script>
 }

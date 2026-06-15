@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="App_Data\" />
+    <Folder Include="wwwroot\themes\magdesign\" />
   </ItemGroup>
 
 </Project>
