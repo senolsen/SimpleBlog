@@ -39,6 +39,98 @@
                     <div class="content-body" style="font-size: 1.1rem; line-height: 1.8; color: #444;">
                         @Html.Raw(Model.Content)
                     </div>
+
+                    <!-- ETİKETLER (TAGS) -->
+                    @if (Model.PostTags != null && Model.PostTags.Any())
+                    {
+                        <div class="post-tags mt-5 pt-3 border-top">
+                            <ul class="list-inline mb-0">
+                                <li class="list-inline-item text-muted fw-bold me-2">
+                                    <i class="bi bi-tags-fill me-1"></i> Etiketler:
+                                </li>
+                                @foreach (var postTag in Model.PostTags)
+                                {
+                                    <li class="list-inline-item">
+                                        <a href="/Etiket/@postTag.Tag?.Name" class="badge bg-light text-dark border border-secondary p-2 text-decoration-none hover-primary">
+                                            @postTag.Tag?.Name
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <div id="comments">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success mt-5 mb-0 fw-bold shadow-sm">
+                                <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+                            </div>
+                        }
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger mt-5 mb-0 fw-bold shadow-sm">
+                                <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                            </div>
+                        }
+
+                        <div class="comments mt-5">
+                            <h5 class="comment-title py-4 border-bottom fw-bold" style="color: var(--color-primary);">
+                                <i class="bi bi-chat-dots me-2"></i> @(Model.Comments?.Count(c => c.IsApproved) ?? 0) Yorum
+                            </h5>
+
+                            @if (Model.Comments != null && Model.Comments.Any(c => c.IsApproved))
+                            {
+                                foreach (var comment in Model.Comments.Where(c => c.IsApproved).OrderByDescending(c => c.CreatedDate))
+                                {
+                                    <div class="comment d-flex mb-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar avatar-sm rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 55px; height: 55px; font-size: 1.5rem;">
+                                                @comment.Name.Substring(0, 1).ToUpper()
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-4 border-bottom pb-3">
+                                            <h5 class="mb-1 fw-bold text-dark">@comment.Name</h5>
+                                            <span class="text-muted" style="font-size: 0.85rem;"><i class="bi bi-clock me-1"></i> @comment.CreatedDate.ToString("dd MMMM yyyy, HH:mm")</span>
+                                            <p class="mt-2 text-dark" style="line-height: 1.6;">@comment.Content</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted mt-3 fst-italic">Bu makaleye henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                            }
+                        </div>
+
+                        <div class="reply-form mt-4 border p-4 bg-light rounded shadow-sm">
+                            <h4 class="fw-bold mb-3">Bir Yorum Bırakın</h4>
+                            <p class="text-muted mb-4" style="font-size: 0.9rem;"><i class="bi bi-shield-lock me-1"></i> E-posta adresiniz gizli tutulacaktır. Gerekli alanlar * ile işaretlenmiştir.</p>
+
+                            <form action="/Makale/AddComment" method="post">
+                                <input type="hidden" name="PostId" value="@Model.Id" />
+                                <input type="hidden" name="Slug" value="@Model.Slug" />
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6 form-group">
+                                        <label class="form-label fw-bold">Adınız *</label>
+                                        <input name="Name" type="text" class="form-control px-3 py-2" placeholder="Örn: Ahmet Yılmaz" required>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="form-label fw-bold">E-Posta (İsteğe Bağlı)</label>
+                                        <input name="Email" type="email" class="form-control px-3 py-2" placeholder="Örn: ahmet@mail.com">
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label class="form-label fw-bold">Yorumunuz *</label>
+                                    <textarea name="Content" class="form-control px-3 py-2" placeholder="Bu konu hakkındaki düşünceleriniz neler?" rows="5" required></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-dark px-4 py-2 fw-bold"><i class="bi bi-send me-2"></i> Yorumu Gönder</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -47,6 +139,9 @@
                 <div class="sidebar ps-lg-4">
                     @await Component.InvokeAsync("SidebarPopularPosts")
                     @await Component.InvokeAsync("SidebarCategories")
+
+
+                    @await Component.InvokeAsync("SidebarTags")
                 </div>
             </div>
 

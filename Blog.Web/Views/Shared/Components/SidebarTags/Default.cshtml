@@ -1,0 +1,111 @@
+﻿@model IEnumerable<Blog.Core.Entities.Tag>
+
+<div class="aside-block">
+    <h3 class="aside-title mb-3">Etiketler</h3>
+
+    <div class="mb-4 position-relative">
+        <i class="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-muted" style="font-size: 0.9rem;"></i>
+        <input type="text" id="tagSearchInput" class="form-control rounded-pill ps-5 bg-light border-0 shadow-none" placeholder="Etiket ara..." style="font-size: 0.95rem;">
+    </div>
+
+    <ul id="tagCloudList" class="aside-tags list-unstyled d-flex flex-wrap gap-2 mb-2">
+        @if (Model != null && Model.Any())
+        {
+            int index = 0;
+            foreach (var tag in Model)
+            {
+                // İlk 12 etiketten sonrasına "extra-tag" ve "d-none" sınıflarını ekleyerek gizliyoruz
+                string extraClass = index >= 12 ? "extra-tag d-none" : "";
+
+                <li class="tag-item @extraClass">
+                    <a href="/Etiket/@tag.Name" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1">
+                        @tag.Name
+                    </a>
+                </li>
+                index++;
+            }
+        }
+        else
+        {
+            <li><span class="text-muted" style="font-size: 0.9rem;">Henüz etiket bulunmuyor.</span></li>
+        }
+    </ul>
+
+    @if (Model != null && Model.Count() > 12)
+    {
+        <div class="text-start mt-2">
+            <button id="toggleTagsBtn" class="btn btn-link btn-sm p-0 text-secondary text-decoration-none fw-bold hover-primary" style="font-size: 0.85rem;">
+                <i class="bi bi-plus-circle me-1"></i>Daha Fazla Göster (@(Model.Count() - 12))
+            </button>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("tagSearchInput");
+        const tagList = document.getElementById("tagCloudList");
+        const toggleBtn = document.getElementById("toggleTagsBtn");
+
+        let isExpanded = false; // Listenin açık/kapalı durumunu tutar
+
+        if (searchInput && tagList) {
+            const tags = tagList.getElementsByClassName("tag-item");
+
+            // 1. DAHA FAZLA / DAHA AZ GÖSTER MANTIĞI
+            if (toggleBtn) {
+                toggleBtn.addEventListener("click", function () {
+                    isExpanded = !isExpanded;
+                    const extraTags = tagList.getElementsByClassName("extra-tag");
+
+                    for (let i = 0; i < extraTags.length; i++) {
+                        if (isExpanded) {
+                            extraTags[i].classList.remove("d-none");
+                        } else {
+                            extraTags[i].classList.add("d-none");
+                        }
+                    }
+
+                    // Buton metnini ve ikonunu güncelle
+                    if (isExpanded) {
+                        toggleBtn.innerHTML = '<i class="bi bi-minus-circle me-1"></i>Daha Az Göster';
+                    } else {
+                        toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Daha Fazla Göster (' + extraTags.length + ')';
+                    }
+                });
+            }
+
+            // 2. GELİŞMİŞ CANLI ARAMA MANTIĞI
+            searchInput.addEventListener("keyup", function () {
+                const filterText = searchInput.value.toLowerCase().trim();
+
+                // Eğer arama kutusu doluysa "Daha Fazla Göster" butonunu gizle ve hepsinde ara
+                if (filterText.length > 0) {
+                    if (toggleBtn) toggleBtn.parentElement.classList.add("d-none");
+
+                    for (let i = 0; i < tags.length; i++) {
+                        const tagText = tags[i].textContent || tags[i].innerText;
+                        if (tagText.toLowerCase().indexOf(filterText) > -1) {
+                            tags[i].classList.remove("d-none"); // Eşleşeni göster (gizli olsa bile açar)
+                        } else {
+                            tags[i].classList.add("d-none"); // Eşleşmeyeni gizle
+                        }
+                    }
+                }
+                // Arama kutusu temizlendiyse ilk baştaki kompakt düzene geri dön
+                else {
+                    if (toggleBtn) toggleBtn.parentElement.classList.remove("d-none");
+
+                    for (let i = 0; i < tags.length; i++) {
+                        // Eğer liste genişletilmemişse (isExpanded = false) ilk 12 dışındakileri tekrar gizle
+                        if (tags[i].classList.contains("extra-tag") && !isExpanded) {
+                            tags[i].classList.add("d-none");
+                        } else {
+                            tags[i].classList.remove("d-none");
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
