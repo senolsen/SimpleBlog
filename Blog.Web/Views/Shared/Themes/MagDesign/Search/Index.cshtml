@@ -1,0 +1,63 @@
+@model IEnumerable<Blog.Core.Entities.Post>
+@{
+    ViewData["Title"] = $"'{ViewBag.SearchQuery}' Arama Sonuçları";
+}
+
+<div class="mag-page-banner">
+    <div class="container">
+        <h1><i class="bi bi-search me-2" style="color:var(--accent)"></i>Arama: "@ViewBag.SearchQuery"</h1>
+        <p>Toplam @Model.Count() sonuç bulundu.</p>
+    </div>
+</div>
+
+<div class="container pb-5" data-aos="fade-up">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            @if (Model.Any())
+            {
+                @foreach (var post in Model)
+                {
+                    <div class="mag-list-post">
+                        <a href="/Makale/@post.Slug" class="mag-list-post-img">
+                            @if (!string.IsNullOrEmpty(post.CoverImagePath))
+                            {
+                                <img src="@post.CoverImagePath" alt="@post.Title">
+                            }
+                            else
+                            {
+                                <img src="https://placehold.co/320x200/f3f4f6/9ca3af?text=MagDesign" alt="@post.Title">
+                            }
+                        </a>
+                        <div class="mag-list-post-body">
+                            <div class="mag-list-post-meta">
+                                <span class="mag-label">@post.Category?.Name</span>
+                                <span>@post.CreatedDate.ToString("dd MMM yyyy")</span>
+                            </div>
+                            <div class="mag-list-post-title">
+                                <a href="/Makale/@post.Slug">@post.Title</a>
+                            </div>
+                            <p class="mag-list-post-excerpt">
+                                @{
+                                    var txt = System.Text.RegularExpressions.Regex.Replace(post.Content, "<.*?>", "");
+                                    @(txt.Length > 180 ? txt.Substring(0, 180) + "…" : txt)
+                                }
+                            </p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-3 text-muted d-block mb-3"></i>
+                    <h4 class="text-muted">Aramanıza uygun sonuç bulunamadı.</h4>
+                    <a href="/" class="mag-btn mt-3 d-inline-block">Ana Sayfaya Dön</a>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            @await Component.InvokeAsync("Sidebar")
+        </div>
+    </div>
+</div>

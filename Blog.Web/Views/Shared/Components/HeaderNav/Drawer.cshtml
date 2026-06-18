@@ -1,0 +1,74 @@
+@model Blog.Web.Models.HeaderNavViewModel
+@using Blog.Web.Helpers
+@{
+    var settings = Model.Settings;
+    var siteName = string.IsNullOrWhiteSpace(settings.SiteTitle) ? "SimpleBlog" : settings.SiteTitle;
+    var path = Model.CurrentPath.ToLowerInvariant();
+    var socialLinks = SocialLinkBuilder.FromSettings(settings);
+
+    bool IsActive(string href)
+    {
+        if (href == "/") return path == "/" || path == "";
+        return path.StartsWith(href.ToLowerInvariant());
+    }
+}
+
+<div class="mobile-drawer-overlay" id="mobileDrawerOverlay" aria-hidden="true"></div>
+
+<aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true" aria-label="Mobil menü">
+    <div class="mobile-drawer-header">
+        <span class="mobile-drawer-title">@siteName</span>
+        <button type="button" class="mobile-drawer-close" aria-label="Menüyü kapat">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <nav class="mobile-drawer-nav" role="navigation">
+        <ul class="mobile-drawer-menu">
+            <li>
+                <a href="/" class="mobile-drawer-link @(IsActive("/") ? "active" : "")">
+                    <i class="bi bi-house-door"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+            </li>
+            <li>
+                <a href="/Hakkimizda" class="mobile-drawer-link @(IsActive("/hakkimizda") ? "active" : "")">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Hakkımızda</span>
+                </a>
+            </li>
+            @if (Model.Categories.Any())
+            {
+                <li class="mobile-drawer-section mobile-drawer-section--collapsed">
+                    <button type="button"
+                            class="mobile-drawer-section-title @(path.StartsWith("/kategori") ? "active" : "")"
+                            aria-expanded="false"
+                            aria-controls="mobileDrawerCategories">
+                        <i class="bi bi-folder2-open"></i>
+                        <span>Kategoriler</span>
+                    </button>
+                    <div class="mobile-drawer-categories" id="mobileDrawerCategories">
+                        @foreach (var category in Model.Categories)
+                        {
+                            <a href="/Kategori/@category.Slug" class="mobile-drawer-category">
+                                <span class="mobile-drawer-category-name">@category.Name</span>
+                                <span class="mobile-drawer-category-count">@category.PostCount</span>
+                            </a>
+                        }
+                    </div>
+                </li>
+            }
+            <li>
+                <a href="/Iletisim" class="mobile-drawer-link @(IsActive("/iletisim") ? "active" : "")">
+                    <i class="bi bi-envelope"></i>
+                    <span>İletişim</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="mobile-drawer-footer">
+        <p class="mobile-drawer-footer-label">Bizi takip edin</p>
+        @await Html.PartialAsync("_SocialLinks", socialLinks, new ViewDataDictionary(ViewData) { { "SocialLinksClass", "site-social-links site-social-links--drawer" } })
+    </div>
+</aside>

@@ -14,8 +14,10 @@
                 <div class="row g-4">
                     @if (Model != null && Model.Any())
                     {
+                        int postIndex = 0;
                         foreach (var post in Model)
                         {
+                            postIndex++;
                             <div class="col-md-6">
                                 <div class="post-entry-1">
                                     <a href="/Makale/@post.Slug">
@@ -46,13 +48,19 @@
                                         }
                                     </p>
                                     <div class="d-flex align-items-center author mt-auto">
-                                        <div class="photo"><i class="bi bi-person-circle fs-3 text-secondary"></i></div>
+                                        <div class="photo" style="margin-right:8px"><i class="bi bi-person-circle fs-3 text-secondary"></i></div>
                                         <div class="name">
                                             <h3 class="m-0 p-0 fs-6">Jetexsoft Editör</h3>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            @if (postIndex % 3 == 0)
+                            {
+                                <div class="col-12">
+                                    @await Component.InvokeAsync("AdSlot", new { slot = "home-list" })
+                                </div>
+                            }
                         }
                     }
                     else
@@ -123,12 +131,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="sidebar ps-lg-4">
-                    @await Component.InvokeAsync("SidebarCategories")
-                    @await Component.InvokeAsync("SidebarPopularPosts")
-
-                    @await Component.InvokeAsync("SidebarTags")
-                </div>
+                @await Component.InvokeAsync("Sidebar")
             </div>
 
         </div>

@@ -1,0 +1,87 @@
+@model Blog.Core.Entities.SiteSetting
+@{
+    ViewData["Title"]           = "İletişim";
+    ViewData["MetaDescription"] = "Soru ve önerileriniz için bizimle iletişime geçin.";
+}
+
+<div class="mag-page-banner">
+    <div class="container">
+        <h1><i class="bi bi-envelope me-2" style="color:var(--accent)"></i>İletişim</h1>
+        <p>Soru, görüş ve proje fikirleriniz için bize ulaşın.</p>
+    </div>
+</div>
+
+<div class="container py-5" data-aos="fade-up">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success fw-bold mb-4"><i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger fw-bold mb-4"><i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model?.MapUrl))
+    {
+        <div class="mb-4 rounded overflow-hidden">
+            <iframe src="@Model.MapUrl" style="border:0;width:100%;height:320px;" allowfullscreen loading="lazy"></iframe>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="mag-contact-item">
+                <i class="bi bi-geo-alt"></i>
+                <div>
+                    <h5>Adres</h5>
+                    <p>@(Model?.ContactAddress ?? "Türkiye")</p>
+                </div>
+            </div>
+            <div class="mag-contact-item">
+                <i class="bi bi-telephone"></i>
+                <div>
+                    <h5>Telefon</h5>
+                    <p>@(Model?.ContactPhone ?? "+90 5XX XXX XX XX")</p>
+                </div>
+            </div>
+            <div class="mag-contact-item">
+                <i class="bi bi-envelope"></i>
+                <div>
+                    <h5>E-Posta</h5>
+                    <p>@(Model?.ContactEmail ?? "info@site.com")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="mag-comment-form">
+                <h4>Mesaj Gönderin</h4>
+                <form action="/Iletisim" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem;">Adınız Soyadınız *</label>
+                            <input type="text" name="Name" class="form-control" placeholder="Ahmet Yılmaz" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem;">E-Posta *</label>
+                            <input type="email" name="Email" class="form-control" placeholder="ahmet@mail.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="font-size:.85rem;">Konu *</label>
+                        <input type="text" name="Subject" class="form-control" placeholder="Konu" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="font-size:.85rem;">Mesajınız *</label>
+                        <textarea name="Message" class="form-control" rows="5" placeholder="Mesajınız…" required></textarea>
+                    </div>
+                    <button type="submit" class="mag-btn">
+                        <i class="bi bi-send me-2"></i>Mesajı Gönder
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,12 +1,4 @@
-﻿@* @{
-    Layout = "_Layout";
-} *@
-
-
-@{
-    // İleride burayı veritabanındaki "Aktif Tema" ayarından çekeceğiz.
-    // Şimdilik test etmek için statik olarak ZenBlog'u işaretliyoruz.
-    string activeTheme = "ZenBlog";
-
+﻿@{
+    var activeTheme = ViewData["ActiveTheme"]?.ToString() ?? "MagDesign";
     Layout = $"~/Views/Shared/Themes/{activeTheme}/_Layout.cshtml";
 }

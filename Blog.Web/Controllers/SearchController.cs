@@ -1,5 +1,6 @@
 ﻿using Blog.Core.Enums;
 using Blog.Service.Abstract;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Web.Controllers;
@@ -7,10 +8,12 @@ namespace Blog.Web.Controllers;
 public class SearchController : Controller
 {
     private readonly IPostService _postService;
+    private readonly IThemeService _themeService;
 
-    public SearchController(IPostService postService)
+    public SearchController(IPostService postService, IThemeService themeService)
     {
         _postService = postService;
+        _themeService = themeService;
     }
 
     // site.com/Search?q=yazilim
@@ -34,7 +37,6 @@ public class SearchController : Controller
 
         ViewBag.SearchQuery = q; // Aranan kelimeyi ekranda göstermek için
 
-        string activeTheme = "ZenBlog";
-        return View($"~/Views/Shared/Themes/{activeTheme}/Search/Index.cshtml", results);
+        return View(_themeService.GetViewPath("Search/Index"), results);
     }
 }

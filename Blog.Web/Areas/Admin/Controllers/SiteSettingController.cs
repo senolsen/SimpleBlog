@@ -1,6 +1,8 @@
 ﻿using Blog.Core.Entities;
 using Blog.Data.Context;
+using Blog.Service.Abstract;
 using Blog.Web.Areas.Admin.Models;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +15,19 @@ public class SiteSettingController : Controller
 {
     private readonly AppDbContext _context;
     private readonly IWebHostEnvironment _env;
+    private readonly ISiteSettingsService _siteSettingsService;
+    private readonly IThemeService _themeService;
 
-    public SiteSettingController(AppDbContext context, IWebHostEnvironment env)
+    public SiteSettingController(
+        AppDbContext context,
+        IWebHostEnvironment env,
+        ISiteSettingsService siteSettingsService,
+        IThemeService themeService)
     {
         _context = context;
         _env = env;
+        _siteSettingsService = siteSettingsService;
+        _themeService = themeService;
     }
 
     [HttpGet]
@@ -45,7 +55,11 @@ public class SiteSettingController : Controller
             AdsenseCode = setting.AdsenseCode,
             SidebarAdCode = setting.SidebarAdCode,
             PostBottomAdCode = setting.PostBottomAdCode,
-            AdsTxtContent=setting.AdsTxtContent
+            HomeListAdCode = setting.HomeListAdCode,
+            AdsTxtContent = setting.AdsTxtContent,
+            RobotsTxtContent = setting.RobotsTxtContent,
+            ActiveTheme = string.IsNullOrWhiteSpace(setting.ActiveTheme) ? ThemeService.DefaultTheme : setting.ActiveTheme,
+            AvailableThemes = _themeService.GetAvailableThemes().ToList()
         };
 
         return View(model);
@@ -61,7 +75,6 @@ public class SiteSettingController : Controller
             _context.SiteSettings.Add(setting);
         }
 
-        // --- Dosya Yükleme İşlemleri ---
         string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "settings");
         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
@@ -87,7 +100,6 @@ public class SiteSettingController : Controller
             setting.FaviconPath = "/uploads/settings/" + faviconName;
         }
 
-        // --- Diğer Verileri Kaydet ---
         setting.SiteTitle = model.SiteTitle;
         setting.SiteDescription = model.SiteDescription;
         setting.ContactEmail = model.ContactEmail;
@@ -103,8 +115,15 @@ public class SiteSettingController : Controller
         setting.AdsenseCode = model.AdsenseCode;
         setting.SidebarAdCode = model.SidebarAdCode;
         setting.PostBottomAdCode = model.PostBottomAdCode;
+        setting.HomeListAdCode = model.HomeListAdCode;
         setting.AdsTxtContent = model.AdsTxtContent;
+        setting.RobotsTxtContent = model.RobotsTxtContent;
+
+        var availableThemes = _themeService.GetAvailableThemes();
+        setting.ActiveTheme = availableThemes.Contains(model.ActiveTheme) ? model.ActiveTheme : ThemeService.DefaultTheme;
+
         await _context.SaveChangesAsync();
+        _siteSettingsService.InvalidateCache();
 
         TempData["SuccessMessage"] = "Tüm ayarlar başarıyla güncellendi.";
         return RedirectToAction(nameof(Index));

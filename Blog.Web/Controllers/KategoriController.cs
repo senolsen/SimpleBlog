@@ -1,6 +1,7 @@
 ﻿using Blog.Core.Entities;
 using Blog.Core.Enums;
 using Blog.Service.Abstract;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Web.Controllers;
@@ -9,11 +10,13 @@ public class KategoriController : Controller
 {
     private readonly IPostService _postService;
     private readonly IGenericService<Category> _categoryService;
+    private readonly IThemeService _themeService;
 
-    public KategoriController(IPostService postService, IGenericService<Category> categoryService)
+    public KategoriController(IPostService postService, IGenericService<Category> categoryService, IThemeService themeService)
     {
         _postService = postService;
         _categoryService = categoryService;
+        _themeService = themeService;
     }
 
     // Yönlendirme yapımız: site.com/Kategori/kategori-slug
@@ -41,10 +44,6 @@ public class KategoriController : Controller
         // Kategori adını tasarımda (View) kullanmak için ViewBag ile gönderiyoruz
         ViewBag.CategoryName = category.Name;
 
-        // Çoklu Tema Mimarisi
-        string activeTheme = "ZenBlog";
-        string viewPath = $"~/Views/Shared/Themes/{activeTheme}/Kategori/Index.cshtml";
-
-        return View(viewPath, categoryPosts);
+        return View(_themeService.GetViewPath("Kategori/Index"), categoryPosts);
     }
 }

@@ -29,6 +29,9 @@
                             <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab"><i class="fas fa-cogs me-1"></i> Gelişmiş</button>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab"><i class="fas fa-palette me-1"></i> Tema</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <button class="nav-link" id="ads-tab" data-bs-toggle="tab" data-bs-target="#ads" type="button" role="tab"><i class="fas fa-ad me-1"></i> Reklam Yönetimi</button>
                         </li>
                     </ul>
@@ -117,6 +120,24 @@
                                 <textarea asp-for="GoogleAnalyticsCode" class="form-control" rows="6" placeholder="Örn: UA-XXXXX-Y veya <script>...</script>"></textarea>
                                 <small class="text-muted"><i class="fas fa-info-circle"></i> Sitenin head etiketleri arasına eklenecek takip kodları.</small>
                             </div>
+                            <div class="mb-3">
+                                <label asp-for="RobotsTxtContent" class="form-label">robots.txt İçeriği</label>
+                                <textarea asp-for="RobotsTxtContent" class="form-control font-monospace" rows="8" placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /Admin/&#10;&#10;Sitemap: https://siteadi.com/sitemap.xml"></textarea>
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Boş bırakılırsa varsayılan robots.txt kullanılır. Dosya adresi: <code>/robots.txt</code></small>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="theme" role="tabpanel">
+                            <div class="mb-3">
+                                <label asp-for="ActiveTheme" class="form-label">Aktif Tema</label>
+                                <select asp-for="ActiveTheme" class="form-select">
+                                    @foreach (var theme in Model.AvailableThemes)
+                                    {
+                                        <option value="@theme">@theme</option>
+                                    }
+                                </select>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Yeni tema eklemek için <code>Views/Shared/Themes/</code> altına klasör oluşturun.</small>
+                            </div>
                         </div>
 
                         <div class="tab-pane fade" id="ads" role="tabpanel">
@@ -127,6 +148,11 @@
                             <div class="mb-3">
                                 <label asp-for="SidebarAdCode" class="form-label">Sidebar (Yan Menü) Reklam Kodu</label>
                                 <textarea asp-for="SidebarAdCode" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="HomeListAdCode" class="form-label">Ana Sayfa Liste Arası Reklam Kodu</label>
+                                <textarea asp-for="HomeListAdCode" class="form-control" rows="3" placeholder="Her 3 yazıdan sonra gösterilir"></textarea>
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Ana sayfadaki yazı listesinde her 3 makale sonrası görünür.</small>
                             </div>
                             <div class="mb-3">
                                 <label asp-for="PostBottomAdCode" class="form-label">Yazı Altı Reklam Kodu</label>

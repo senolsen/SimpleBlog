@@ -2,6 +2,7 @@
 using Blog.Core.Enums;
 using Blog.Data.Context; // AppDbContext için eklendi
 using Blog.Service.Abstract;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // Include ve ToListAsync için eklendi
 
@@ -11,13 +12,15 @@ public class MakaleController : Controller
 {
     private readonly IPostService _postService;
     private readonly IGenericService<Comment> _commentService;
-    private readonly AppDbContext _context; // Veritabanı bağlamı eklendi
+    private readonly AppDbContext _context;
+    private readonly IThemeService _themeService;
 
-    public MakaleController(IPostService postService, IGenericService<Comment> commentService, AppDbContext context)
+    public MakaleController(IPostService postService, IGenericService<Comment> commentService, AppDbContext context, IThemeService themeService)
     {
         _postService = postService;
         _commentService = commentService;
-        _context = context; // Ataması yapıldı
+        _context = context;
+        _themeService = themeService;
     }
 
     [Route("Makale/{slug}")]
@@ -47,11 +50,7 @@ public class MakaleController : Controller
         post.ViewCount += 1;
         await _postService.UpdateAsync(post);
 
-        // Çoklu Tema Mimarisi Yönlendirmesi
-        string activeTheme = "ZenBlog";
-        string viewPath = $"~/Views/Shared/Themes/{activeTheme}/Makale/Details.cshtml";
-
-        return View(viewPath, post);
+        return View(_themeService.GetViewPath("Makale/Details"), post);
     }
 
     [HttpPost]

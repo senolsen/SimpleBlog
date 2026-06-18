@@ -60,7 +60,8 @@ public class PostController : Controller
                 AppUserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
                 MetaTitle = model.MetaTitle,
                 MetaDescription = model.MetaDescription,
-                Slug = UrlHelper.GenerateSlug(model.Title)
+                Slug = UrlHelper.GenerateSlug(model.Title),
+                Status = model.Status
             };
 
             post.PostTags = new List<PostTag>();

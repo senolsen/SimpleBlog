@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Jetexsoft Lisans Üretici</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <header class="header">
+            <div class="container header-inner">
+                <div class="brand">
+                    <span class="brand-icon">🔑</span>
+                    <div>
+                        <strong>Jetexsoft</strong>
+                        <small>Lisans Yönetim Sistemi</small>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <a asp-controller="License" asp-action="Index" class="nav-link">Lisanslar</a>
+                    <a asp-controller="License" asp-action="Create" class="nav-link">Yeni Lisans</a>
+                </nav>
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-form">
+                    @Html.AntiForgeryToken()
+                    <span class="user-badge">@User.Identity.Name</span>
+                    <button type="submit" class="btn btn-outline">Çıkış</button>
+                </form>
+            </div>
+        </header>
+    }
+
+    <main class="container main-content">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <small>&copy; @DateTime.Now.Year Jetexsoft — Dahili kullanım</small>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

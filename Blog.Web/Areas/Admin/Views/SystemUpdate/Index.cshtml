@@ -1,0 +1,220 @@
+@model Blog.Web.Areas.Admin.Models.SystemUpdateViewModel
+@{
+    ViewData["Title"] = "Sistem Güncelleme";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0"><i class="fas fa-cloud-download-alt me-2"></i> Sistem Güncelleme</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                @* Sürüm Bilgisi *@
+                <div class="card card-outline card-primary shadow mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0"><i class="fas fa-code-branch me-2"></i>Sürüm Durumu</h5>
+                        @if (Model.UpdateInfo.UpdateAvailable)
+                        {
+                            <span class="badge text-bg-warning">Güncelleme Mevcut</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-success">Güncel</span>
+                        }
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="text-muted small">Mevcut Sürüm</div>
+                                <div class="fs-5 fw-bold">v@Model.UpdateInfo.CurrentVersion</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">En Son Sürüm</div>
+                                <div class="fs-5 fw-bold">
+                                    @(Model.UpdateInfo.LatestVersion != null ? $"v{Model.UpdateInfo.LatestVersion}" : "—")
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Sunucu Ortamı</div>
+                                <div class="fs-6 fw-semibold">
+                                    <i class="fas fa-server me-1"></i>@Model.UpdateInfo.HostingPlatform
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.UpdateInfo.CheckError))
+                        {
+                            <div class="alert alert-warning mb-3">
+                                <i class="fas fa-exclamation-triangle me-1"></i> @Model.UpdateInfo.CheckError
+                            </div>
+                        }
+
+                        @if (Model.UpdateInfo.UpdateAvailable)
+                        {
+                            <div class="alert alert-info">
+                                <strong>Tek tıkla güncelleme</strong> — WordPress gibi çalışır:
+                                bakım modu açılır, dosyalar indirilip FTP ile kurulur,
+                                sunucu ortamına göre (Windows/Linux) otomatik yeniden başlatılır,
+                                migration'lar uygulanır.
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.UpdateInfo.ReleaseNotes))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Sürüm Notları</label>
+                                    <div class="border rounded p-3 bg-light release-notes">@Model.UpdateInfo.ReleaseNotes</div>
+                                </div>
+                            }
+
+                            @if (Model.HasSavedFtpPassword)
+                            {
+                                <form asp-action="Install" method="post" id="installForm">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-primary" id="btnInstall">
+                                        <i class="fas fa-download me-1"></i> v@(Model.UpdateInfo.LatestVersion) Sürümünü İndir ve Kur
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Güncellemeyi kurmak için önce aşağıdaki FTP ayarlarını kaydedin.
+                                </div>
+                            }
+                        }
+                        else if (Model.UpdateInfo.IsConfigured)
+                        {
+                            <p class="text-muted mb-0">Sisteminiz güncel. Yeni bir sürüm yayınlandığında burada görünecek.</p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.UpdateInfo.ReleasePageUrl))
+                        {
+                            <div class="mt-3">
+                                <a href="@Model.UpdateInfo.ReleasePageUrl" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i> GitHub Release Sayfası
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @* FTP Ayarları *@
+                <div class="card card-outline card-secondary shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-server me-2"></i>FTP Güncelleme Ayarları</h5>
+                    </div>
+                    <form asp-action="SaveFtp" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="card-body">
+                            <p class="text-muted">
+                                Paylaşımlı hosting ortamlarında WordPress benzeri güncelleme için FTP bilgilerinizi girin.
+                                Hosting panelinizdeki FTP kullanıcı adı ve şifresini kullanın.
+                            </p>
+
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label asp-for="FtpSettings.Host" class="form-label"></label>
+                                    <input asp-for="FtpSettings.Host" class="form-control" placeholder="ftp.siteadi.com" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="FtpSettings.Port" class="form-label"></label>
+                                    <input asp-for="FtpSettings.Port" class="form-control" type="number" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FtpSettings.Username" class="form-label"></label>
+                                    <input asp-for="FtpSettings.Username" class="form-control" autocomplete="off" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FtpSettings.Password" class="form-label"></label>
+                                    <input asp-for="FtpSettings.Password" class="form-control" type="password" autocomplete="new-password"
+                                           placeholder="@(Model.HasSavedFtpPassword ? "Değiştirmek için yeni şifre girin" : "FTP şifresi")" />
+                                    @if (Model.HasSavedFtpPassword)
+                                    {
+                                        <div class="form-text">Boş bırakırsanız mevcut şifre korunur.</div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="FtpSettings.RemotePath" class="form-label"></label>
+                                <input asp-for="FtpSettings.RemotePath" class="form-control" placeholder="/httpdocs veya /" />
+                                <div class="form-text">Sitenizin kök klasörü. Çoğu hosting'de <code>/httpdocs</code>, <code>/public_html</code> veya <code>/</code> olur.</div>
+                            </div>
+
+                            <div class="form-check mb-0">
+                                <input asp-for="FtpSettings.UseSsl" class="form-check-input" type="checkbox" />
+                                <label asp-for="FtpSettings.UseSsl" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex gap-2">
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="fas fa-save me-1"></i> FTP Ayarlarını Kaydet
+                            </button>
+                            @if (Model.HasSavedFtpPassword)
+                            {
+                                <button type="submit" formaction="@Url.Action("TestFtp")" class="btn btn-outline-primary">
+                                    <i class="fas fa-plug me-1"></i> Bağlantıyı Test Et
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+
+                <div class="alert alert-light border mt-4 mb-0">
+                    <strong>Korunan dosyalar:</strong>
+                    <code>appsettings.Production.json</code>,
+                    <code>wwwroot/uploads/</code> ve
+                    <code>App_Data/</code> güncelleme sırasında üzerine yazılmaz.
+                    Veritabanı migration'ları site yeniden başladığında otomatik uygulanır.
+                    <br><span class="text-muted small">
+                        Windows sunucularda <code>web.config</code>, Linux sunucularda
+                        <code>tmp/restart.txt</code> ile otomatik restart tetiklenir — kullanıcı fark etmez.
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .release-notes { white-space: pre-wrap; max-height: 240px; overflow-y: auto; font-size: 0.9rem; }
+    </style>
+    <script>
+        const btnInstall = document.getElementById('btnInstall');
+        if (btnInstall) {
+            btnInstall.addEventListener('click', function () {
+                Swal.fire({
+                    title: 'Güncelleme kurulsun mu?',
+                    html: 'Site bakım moduna alınacak, yeni dosyalar FTP ile yüklenecek ve uygulama yeniden başlayacak.<br><strong>1-2 dakika sürebilir.</strong>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Evet, Kur',
+                    cancelButtonText: 'Vazgeç'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Kurulum yapılıyor...',
+                            html: 'Lütfen bekleyin. Sayfa yeniden yüklenebilir.',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+                        document.getElementById('installForm').submit();
+                    }
+                });
+            });
+        }
+    </script>
+}

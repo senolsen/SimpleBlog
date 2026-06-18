@@ -1,0 +1,59 @@
+@model GenerateViewModel
+@{
+    ViewData["Title"] = "Lisans Üret";
+}
+
+<div class="page-header">
+    <h1>Lisans Anahtarı Üret</h1>
+    <p>Müşteri domain adresini girerek şifreli lisans anahtarı oluşturun.</p>
+</div>
+
+<div class="card">
+    <form asp-action="Index" method="post" class="form">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label asp-for="Domain"></label>
+            <input asp-for="Domain" class="form-control" placeholder="ornek: musteri.com" />
+            <span asp-validation-for="Domain" class="field-error"></span>
+            <small class="form-hint">www olmadan, küçük harfle yazılması önerilir.</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lisans Üret</button>
+    </form>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-error">
+        <strong>Hata:</strong> @Model.ErrorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.GeneratedKey))
+{
+    <div class="card result-card">
+        <h2>Üretilen Lisans Anahtarı</h2>
+        <div class="license-key-box">
+            <code id="licenseKey">@Model.GeneratedKey</code>
+            <button type="button" class="btn btn-outline btn-sm" onclick="copyLicenseKey()">Kopyala</button>
+        </div>
+
+        <div class="verification @(Model.IsVerified == true ? "verified" : "failed")">
+            <strong>Doğrulama:</strong>
+            @Model.VerifiedDomain
+            @if (Model.IsVerified == true)
+            {
+                <span class="badge badge-success">Eşleşme başarılı</span>
+            }
+            else
+            {
+                <span class="badge badge-danger">Eşleşme başarısız</span>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

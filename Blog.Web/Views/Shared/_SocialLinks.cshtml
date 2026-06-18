@@ -1,0 +1,28 @@
+@using Blog.Web.Helpers
+@model IReadOnlyList<SocialLinkItem>
+@{
+    var cssClass = ViewData["SocialLinksClass"]?.ToString() ?? "site-social-links";
+}
+
+<div class="@cssClass">
+    @foreach (var item in Model)
+    {
+        if (!string.IsNullOrWhiteSpace(item.Url))
+        {
+            <a href="@item.Url"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="site-social-link"
+               aria-label="@item.Name">
+                <i class="bi @item.IconClass" aria-hidden="true"></i>
+            </a>
+        }
+        else
+        {
+            <span class="site-social-link site-social-link--disabled"
+                  title="@(item.Name) — Admin panelinden link ekleyin">
+                <i class="bi @item.IconClass" aria-hidden="true"></i>
+            </span>
+        }
+    }
+</div>

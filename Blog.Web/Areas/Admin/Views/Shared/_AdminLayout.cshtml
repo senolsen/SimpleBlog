@@ -43,58 +43,87 @@
                                 <p>Anasayfa</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-list"></i>
-                                <p>Kategoriler</p>
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Editör"))
+                        {
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-list"></i>
+                                    <p>Kategoriler</p>
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a asp-area="Admin" asp-controller="Post" asp-action="Index" class="nav-link">
                                 <i class="nav-icon fas fa-edit"></i>
                                 <p>Yazı Yönetimi</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/Admin/Tag/Index" class="nav-link">
-                                <i class="nav-icon fas fa-tags"></i>
-                                <p>Etiket Yönetimi</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="/Admin/Comment/Index" class="nav-link">
-                                <i class="nav-icon fas fa-comments"></i>
-                                <p>Yorumlar</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Kullanıcı Yönetimi</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-area="Admin" asp-controller="SiteSetting" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>Genel Ayarlar</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-area="Admin" asp-controller="Page" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-copy"></i>
-                                <p>Sayfalar</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-envelope"></i>
-                                <p>
-                                    Gelen Mesajlar
-                                    @await Component.InvokeAsync("UnreadMessageCount")
-                                </p>
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Editör"))
+                        {
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="Tag" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-tags"></i>
+                                    <p>Etiket Yönetimi</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="Comment" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-comments"></i>
+                                    <p>Yorumlar</p>
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="User" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-users"></i>
+                                    <p>Kullanıcı Yönetimi</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="SiteSetting" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-cog"></i>
+                                    <p>Genel Ayarlar</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="License" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-key"></i>
+                                    <p>Lisans Yönetimi</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="Maintenance" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-tools"></i>
+                                    <p>Site Bakımı</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="SystemUpdate" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-cloud-download-alt"></i>
+                                    <p>Sistem Güncelleme</p>
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin") || User.IsInRole("Editör"))
+                        {
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="Page" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-copy"></i>
+                                    <p>Sayfalar</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" class="nav-link">
+                                    <i class="nav-icon fas fa-envelope"></i>
+                                    <p>
+                                        Gelen Mesajlar
+                                        @await Component.InvokeAsync("UnreadMessageCount")
+                                    </p>
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a asp-area="Admin" asp-controller="Auth" asp-action="Logout" class="nav-link">
                                 <i class="nav-icon fas fa-sign-out-alt"></i>
@@ -199,6 +228,23 @@
                     text: @Html.Raw(Json.Serialize(TempData["SuccessMessage"])),
                     showConfirmButton: false,
                     timer: 2500,
+                    toast: true
+                });
+            });
+        </script>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Hata!',
+                    text: @Html.Raw(Json.Serialize(TempData["ErrorMessage"])),
+                    showConfirmButton: false,
+                    timer: 3500,
                     toast: true
                 });
             });

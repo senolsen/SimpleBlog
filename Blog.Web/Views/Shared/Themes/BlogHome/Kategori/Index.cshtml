@@ -1,0 +1,180 @@
+@model IEnumerable<Blog.Core.Entities.Post>
+
+@{
+
+    ViewData["Title"] = $"{ViewBag.CategoryName} Makaleleri";
+
+    ViewData["MetaDescription"] = $"{ViewBag.CategoryName} kategorisindeki en güncel yazılar.";
+
+    var posts = Model?.ToList() ?? new List<Blog.Core.Entities.Post>();
+
+    var leftCol = posts.Take((posts.Count + 1) / 2).ToList();
+
+    var rightCol = posts.Skip((posts.Count + 1) / 2).ToList();
+
+}
+
+
+
+<header class="bh-page-header py-4 bg-light border-bottom mb-4">
+
+    <div class="container">
+
+        <div class="text-center">
+
+            <h1 class="fw-bolder mb-2"><i class="bi bi-folder2-open me-2"></i>@ViewBag.CategoryName</h1>
+
+            <p class="lead mb-0">Toplam @posts.Count makale bulundu.</p>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<div class="container mb-5">
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            @if (posts.Any())
+
+            {
+
+                <div class="row">
+
+                    <div class="col-lg-6">
+
+                        @foreach (var post in leftCol)
+
+                        {
+
+                            <div class="card mb-4">
+
+                                <a href="/Makale/@post.Slug">
+
+                                    @if (!string.IsNullOrEmpty(post.CoverImagePath))
+
+                                    {
+
+                                        <img class="card-img-top" src="@post.CoverImagePath" alt="@post.Title">
+
+                                    }
+
+                                    else
+
+                                    {
+
+                                        <img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="@post.Title">
+
+                                    }
+
+                                </a>
+
+                                <div class="card-body">
+
+                                    <div class="small text-muted mb-2">
+
+                                        <i class="bi bi-calendar3 me-1"></i>@post.CreatedDate.ToString("dd MMMM yyyy")
+
+                                    </div>
+
+                                    <h2 class="card-title h4"><a href="/Makale/@post.Slug" class="text-decoration-none text-dark">@post.Title</a></h2>
+
+                                    <a class="btn btn-primary btn-sm" href="/Makale/@post.Slug">Devamını oku &rarr;</a>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                    <div class="col-lg-6">
+
+                        @foreach (var post in rightCol)
+
+                        {
+
+                            <div class="card mb-4">
+
+                                <a href="/Makale/@post.Slug">
+
+                                    @if (!string.IsNullOrEmpty(post.CoverImagePath))
+
+                                    {
+
+                                        <img class="card-img-top" src="@post.CoverImagePath" alt="@post.Title">
+
+                                    }
+
+                                    else
+
+                                    {
+
+                                        <img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="@post.Title">
+
+                                    }
+
+                                </a>
+
+                                <div class="card-body">
+
+                                    <div class="small text-muted mb-2">
+
+                                        <i class="bi bi-calendar3 me-1"></i>@post.CreatedDate.ToString("dd MMMM yyyy")
+
+                                    </div>
+
+                                    <h2 class="card-title h4"><a href="/Makale/@post.Slug" class="text-decoration-none text-dark">@post.Title</a></h2>
+
+                                    <a class="btn btn-primary btn-sm" href="/Makale/@post.Slug">Devamını oku &rarr;</a>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            }
+
+            else
+
+            {
+
+                <div class="text-center py-5 card">
+
+                    <div class="card-body">
+
+                        <i class="bi bi-journal-x display-3 text-muted d-block mb-3"></i>
+
+                        <h4 class="text-muted">Bu kategoride henüz yayınlanmış makale yok.</h4>
+
+                    </div>
+
+                </div>
+
+            }
+
+        </div>
+
+
+
+        <div class="col-lg-4">
+
+            @await Component.InvokeAsync("Sidebar")
+
+        </div>
+
+    </div>
+
+</div>
+

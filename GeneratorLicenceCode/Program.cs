@@ -1,38 +1,61 @@
-﻿using Blog.Core.Helpers;
+﻿using GeneratorLicenceCode.Data;
+using GeneratorLicenceCode.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
-Console.WriteLine("-------------------------------------------");
-Console.WriteLine("    Jetexsoft Blog Lisans Üretici v1.0");
-Console.WriteLine("-------------------------------------------");
+var builder = WebApplication.CreateBuilder(args);
 
-while (true)
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
 {
-    Console.Write("\nLisanslanacak Domain (örn: musteri.com): ");
-    string? domain = Console.ReadLine();
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
-    if (string.IsNullOrEmpty(domain)) break;
+builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("Auth"));
 
-    try
+builder.Services.AddDbContext<LicenceDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("LicenceDb")));
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        // 1. Şifrele
-        string encryptedKey = SecurityHelper.EncryptDomain(domain.Trim().ToLower());
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/Login";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
 
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("\n [BAŞARILI] Üretilen Lisans Anahtarı:");
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("------------------------------------------------------------");
-        Console.WriteLine(encryptedKey);
-        Console.WriteLine("------------------------------------------------------------");
+builder.Services.AddAuthorization();
 
-        // 2. Test Et (Kendi kendini doğrula)
-        string testDecrypt = SecurityHelper.DecryptDomain(encryptedKey);
-        Console.WriteLine($"Test Doğrulaması: {testDecrypt} (Eşleşme: {domain.ToLower() == testDecrypt})");
-    }
-    catch (Exception ex)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Hata oluştu: " + ex.Message);
-        Console.ResetColor();
-    }
+var app = builder.Build();
 
-    Console.WriteLine("\nYeni bir anahtar üretmek için devam edin, çıkmak için Enter'a basın...");
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LicenceDbContext>();
+    db.Database.Migrate();
 }
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=License}/{action=Index}/{id?}");
+
+app.Run();

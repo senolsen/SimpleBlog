@@ -1,5 +1,80 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿<!DOCTYPE html>
+<html lang="tr">
 @{
+    var settings    = ViewData["SiteSettings"] as Blog.Core.Entities.SiteSetting;
+    var siteTitle   = settings?.SiteTitle ?? "SimpleBlog";
+    var assetsPath  = ViewData["ThemeAssetsPath"]?.ToString() ?? "/themes/magdesign/assets";
+    var metaDesc    = ViewData["MetaDescription"]?.ToString() ?? settings?.SiteDescription;
 }
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - @siteTitle</title>
+
+    @if (!string.IsNullOrEmpty(metaDesc))
+    {
+        <meta name="description" content="@metaDesc">
+    }
+
+    @if (!string.IsNullOrEmpty(settings?.FaviconPath))
+    {
+        <link rel="icon" href="@settings.FaviconPath">
+    }
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+    <link href="@(assetsPath)/css/main.css" rel="stylesheet">
+
+    @if (!string.IsNullOrWhiteSpace(settings?.GoogleAnalyticsCode))
+    {
+        @Html.Raw(settings.GoogleAnalyticsCode)
+    }
+    @if (!string.IsNullOrWhiteSpace(settings?.AdsenseCode))
+    {
+        @Html.Raw(settings.AdsenseCode)
+    }
+</head>
+
+<body>
+
+    @await Component.InvokeAsync("HeaderNav")
+
+    <div id="searchWrap" class="custom-search-wrap" role="dialog" aria-label="Arama">
+        <div class="container">
+            <form action="/Search" method="get" class="d-flex align-items-center gap-3 w-100">
+                <i class="bi bi-search fs-5 text-muted" aria-hidden="true"></i>
+                <input type="text" name="q" class="form-control form-control-lg border-0 shadow-none bg-transparent"
+                       placeholder="Kelime girin ve Enter'a basın..." aria-label="Arama kelimesi">
+                <button type="button" id="btnSearchClose" class="btn border-0 p-0" aria-label="Aramayı kapat">
+                    <i class="bi bi-x-lg fs-5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <main id="main">
+        @RenderBody()
+    </main>
+
+    @await Component.InvokeAsync("SiteFooter")
+
+    <a href="#" class="scroll-top" aria-label="Yukarı çık">
+        <i class="bi bi-arrow-up-short"></i>
+    </a>
+
+    @await Component.InvokeAsync("HeaderNav", new { part = "drawer" })
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="@(assetsPath)/js/main.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

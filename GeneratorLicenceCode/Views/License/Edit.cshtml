@@ -1,0 +1,33 @@
+@model LicenseFormViewModel
+@{
+    ViewData["Title"] = "Lisans Düzenle";
+    ViewData["showKey"] = true;
+    ViewData["showMeta"] = true;
+}
+
+<div class="page-header">
+    <h1>Lisans Düzenle</h1>
+    <p>@Model.Domain kaydını güncelleyin. Domain değişirse lisans anahtarı otomatik yenilenir.</p>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="card">
+    <form asp-action="Edit" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <partial name="_LicenseFormFields" model="Model" />
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline">Detay</a>
+            <a asp-action="Index" class="btn btn-outline">Listeye Dön</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

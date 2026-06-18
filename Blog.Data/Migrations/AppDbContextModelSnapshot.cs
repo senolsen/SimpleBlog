@@ -445,6 +445,10 @@ namespace Blog.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ActiveTheme")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AdsTxtContent")
                         .HasColumnType("nvarchar(max)");
 
@@ -475,6 +479,9 @@ namespace Blog.Data.Migrations
                     b.Property<string>("GoogleAnalyticsCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("HomeListAdCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("InstagramUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -484,16 +491,25 @@ namespace Blog.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsMaintenanceMode")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LinkedinUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LogoPath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("MaintenanceMessage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MapUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PostBottomAdCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RobotsTxtContent")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SidebarAdCode")
@@ -504,6 +520,24 @@ namespace Blog.Data.Migrations
 
                     b.Property<string>("SiteTitle")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdateFtpHost")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdateFtpPasswordProtected")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UpdateFtpPort")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdateFtpRemotePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("UpdateFtpUseSsl")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UpdateFtpUsername")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")

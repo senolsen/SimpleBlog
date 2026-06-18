@@ -59,12 +59,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="sidebar ps-lg-4">
-                    @await Component.InvokeAsync("SidebarCategories")
-                    @await Component.InvokeAsync("SidebarPopularPosts")
-
-                    @await Component.InvokeAsync("SidebarTags")
-                </div>
+                @await Component.InvokeAsync("Sidebar")
             </div>
 
         </div>

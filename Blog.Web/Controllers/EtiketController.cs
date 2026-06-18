@@ -2,6 +2,7 @@
 using Blog.Core.Enums;
 using Blog.Data.Context; // AppDbContext için eklendi
 using Blog.Service.Abstract;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // ToListAsync için eklendi
 
@@ -12,12 +13,14 @@ public class EtiketController : Controller
     private readonly IGenericService<Tag> _tagService;
     private readonly AppDbContext _context; // IGenericService<PostTag> yerine doğrudan DbContext kullanıyoruz
     private readonly IPostService _postService;
+    private readonly IThemeService _themeService;
 
-    public EtiketController(IGenericService<Tag> tagService, AppDbContext context, IPostService postService)
+    public EtiketController(IGenericService<Tag> tagService, AppDbContext context, IPostService postService, IThemeService themeService)
     {
         _tagService = tagService;
         _context = context;
         _postService = postService;
+        _themeService = themeService;
     }
 
     // Kullanım: jetexsoft.com/Etiket/csharp
@@ -53,7 +56,6 @@ public class EtiketController : Controller
         // Ekranda orijinal büyük/küçük harfiyle göstermek için ViewBag'e atıyoruz
         ViewBag.TagName = currentTag.Name;
 
-        string activeTheme = "ZenBlog";
-        return View($"~/Views/Shared/Themes/{activeTheme}/Etiket/Index.cshtml", results);
+        return View(_themeService.GetViewPath("Etiket/Index"), results);
     }
 }

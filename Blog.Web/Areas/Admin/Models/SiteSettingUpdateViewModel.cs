@@ -35,6 +35,13 @@ public class SiteSettingUpdateViewModel
     public string? AdsenseCode { get; set; }
     public string? SidebarAdCode { get; set; }
     public string? PostBottomAdCode { get; set; }
+    public string? HomeListAdCode { get; set; }
 
     public string? AdsTxtContent { get; set; }
+
+    public string? RobotsTxtContent { get; set; }
+
+    public string ActiveTheme { get; set; } = "MagDesign";
+
+    public List<string> AvailableThemes { get; set; } = [];
 }

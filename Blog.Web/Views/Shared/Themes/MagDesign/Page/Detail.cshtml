@@ -1,0 +1,23 @@
+@model Blog.Core.Entities.Page
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["MetaDescription"] = $"{Model.Title} hakkında detaylı bilgiler.";
+}
+
+<div class="mag-page-banner">
+    <div class="container">
+        <h1><i class="bi bi-file-text me-2" style="color:var(--accent)"></i>@Model.Title</h1>
+    </div>
+</div>
+
+<div class="container py-5" data-aos="fade-up">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mag-about-card">
+                <div class="content-body" style="font-size:1.05rem;line-height:1.85;">
+                    @Html.Raw(Model.Content)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

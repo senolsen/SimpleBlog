@@ -1,5 +1,6 @@
 ﻿using Blog.Core.Entities;
 using Blog.Service.Abstract;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Web.Controllers;
@@ -7,29 +8,25 @@ namespace Blog.Web.Controllers;
 public class PageController : Controller
 {
     private readonly IGenericService<Page> _pageService;
+    private readonly IThemeService _themeService;
 
-    public PageController(IGenericService<Page> pageService)
+    public PageController(IGenericService<Page> pageService, IThemeService themeService)
     {
         _pageService = pageService;
+        _themeService = themeService;
     }
 
     public async Task<IActionResult> Detail(string slug)
     {
-        // Slug boşsa doğrudan 404'e at
         if (string.IsNullOrEmpty(slug))
             return NotFound();
 
-        // WhereAsync ile filtreleyip dönen listeden ilk kaydı (FirstOrDefault) alıyoruz
         var pages = await _pageService.WhereAsync(x => x.Slug == slug && x.IsActive && !x.IsDeleted);
         var page = pages.FirstOrDefault();
 
-        // Eğer veritabanında da böyle bir sayfa yoksa, gerçekten 404 (Bulunamadı) sayfası ver
         if (page == null)
-        {
             return NotFound();
-        }
 
-        // Sayfa bulunduysa View'a gönder
-        return View(page);
+        return View(_themeService.GetViewPath("Page/Detail"), page);
     }
 }

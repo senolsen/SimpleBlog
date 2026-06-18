@@ -1,0 +1,24 @@
+@model LicenseFormViewModel
+@{
+    ViewData["Title"] = "Yeni Lisans";
+}
+
+<div class="page-header">
+    <h1>Yeni Lisans Oluştur</h1>
+    <p>Domain bilgisini girerek yeni bir lisans kaydı oluşturun.</p>
+</div>
+
+<div class="card">
+    <form asp-action="Create" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <partial name="_LicenseFormFields" model="Model" />
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Lisans Oluştur</button>
+            <a asp-action="Index" class="btn btn-outline">İptal</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

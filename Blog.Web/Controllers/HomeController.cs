@@ -1,6 +1,7 @@
 using Blog.Core.Entities;
 using Blog.Core.Enums;
 using Blog.Service.Abstract;
+using Blog.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Web.Controllers;
@@ -9,93 +10,86 @@ public class HomeController : Controller
 {
     private readonly IPostService _postService;
     private readonly IGenericService<Page> _pageService;
-    private readonly IGenericService<SiteSetting> _siteSettingService; // <-- TEKÝL OLARAK DÜZELTÝLDÝ
-    private readonly IGenericService<ContactMessage> _contactMessageService;
+    private readonly IGenericService<ContactMessage> _messageService;
+    private readonly ISiteSettingsService _siteSettingsService;
+    private readonly IThemeService _themeService;
 
-    public HomeController(IPostService postService, IGenericService<Page> pageService, IGenericService<SiteSetting> siteSettingService, IGenericService<ContactMessage> contactMessageService)
+    public HomeController(
+        IPostService postService,
+        IGenericService<Page> pageService,
+        IGenericService<ContactMessage> messageService,
+        ISiteSettingsService siteSettingsService,
+        IThemeService themeService)
     {
         _postService = postService;
         _pageService = pageService;
-        _siteSettingService = siteSettingService;
-        _contactMessageService = contactMessageService;
+        _messageService = messageService;
+        _siteSettingsService = siteSettingsService;
+        _themeService = themeService;
     }
-    [HttpGet]
+
     public async Task<IActionResult> Index(int page = 1)
     {
-        int pageSize = 6; // Her sayfada gösterilecek maksimum makale sayýsý (Ýdeal olaný 6 veya 8'dir)
-
-        // Tüm yayýnlanmýþ ve silinmemiþ makaleleri çekiyoruz
+        const int pageSize = 6;
         var allPosts = await _postService.GetPostsWithCategoryAsync(null);
-        var publishedPosts = allPosts
+        var published = allPosts
             .Where(p => p.Status == PostStatus.Published && !p.IsDeleted)
             .OrderByDescending(p => p.CreatedDate)
             .ToList();
 
-        // Toplam makale sayýsý ve toplam sayfa sayýsýný hesaplýyoruz
-        int totalPosts = publishedPosts.Count;
-        int totalPages = (int)Math.Ceiling((double)totalPosts / pageSize);
-
-        // Güvenlik Önlemi: Sayfa sýnýrlarýnýn dýþýna çýkýlmasýný engelle
         if (page < 1) page = 1;
-        if (page > totalPages && totalPages > 0) page = totalPages;
+        var totalPages = Math.Max(1, (int)Math.Ceiling(published.Count / (double)pageSize));
+        if (page > totalPages) page = totalPages;
 
-        // Sihirli Bölüm: Skip ile önceki sayfalarý atla, Take ile sadece pageSize kadarýný al
-        var paginatedPosts = publishedPosts
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        // Sayfalama bilgilerini View tarafýna fýrlatýyoruz
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = totalPages;
 
-        string activeTheme = "ZenBlog";
-        return View($"~/Views/Shared/Themes/{activeTheme}/Home/Index.cshtml", paginatedPosts);
+        var pagePosts = published.Skip((page - 1) * pageSize).Take(pageSize);
+        return View(_themeService.GetViewPath("Home/Index"), pagePosts);
     }
 
-    // site.com/Hakkimizda adresine gidildiðinde çalýþacak
     [Route("Hakkimizda")]
     public async Task<IActionResult> Hakkimizda()
     {
-        // DB'den slug'ý "hakkimizda" olan veriyi çekiyoruz
         var pages = await _pageService.WhereAsync(p => p.Slug == "hakkimizda" && !p.IsDeleted && p.IsActive);
-        var page = pages.FirstOrDefault();
+        var page = pages.FirstOrDefault() ?? new Page
+        {
+            Title = "Hakk?m?zda",
+            Content = "<p>Bu sayfan?n iï¿½eri?ini admin panelinden dï¿½zenleyebilirsiniz. Slug de?eri <strong>hakkimizda</strong> olan bir sayfa olu?turun.</p>"
+        };
 
-        if (page == null) return RedirectToAction("Index", "Home");
-
-        string activeTheme = "ZenBlog";
-        return View($"~/Views/Shared/Themes/{activeTheme}/Home/Hakkimizda.cshtml", page);
+        return View(_themeService.GetViewPath("Home/Hakkimizda"), page);
     }
 
-    // ÝLETÝÞÝM SAYFASINI AÇ (GET)
     [Route("Iletisim")]
     [HttpGet]
     public async Task<IActionResult> Iletisim()
     {
-        // Sistemdeki aktif ayarlarý çekiyoruz
-        var settingsList = await _siteSettingService.GetAllAsync();
-        var currentSettings = settingsList.FirstOrDefault();
-
-        string activeTheme = "ZenBlog";
-        return View($"~/Views/Shared/Themes/{activeTheme}/Home/Iletisim.cshtml", currentSettings);
+        var settings = await _siteSettingsService.GetSettingsAsync();
+        return View(_themeService.GetViewPath("Home/Iletisim"), settings);
     }
 
     [Route("Iletisim")]
     [HttpPost]
-    public async Task<IActionResult> Iletisim(ContactMessage model)
+    public async Task<IActionResult> Iletisim(string name, string email, string subject, string message)
     {
-        if (ModelState.IsValid)
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(message))
         {
-            model.CreatedDate = DateTime.Now;
-            model.IsRead = false;
-
-            await _contactMessageService.AddAsync(model);
-
-            TempData["SuccessMessage"] = "Mesajýnýz baþarýyla Jetexsoft ekibine iletildi. En kýsa sürede dönüþ yapýlacaktýr.";
-            return RedirectToAction("Iletisim");
+            TempData["ErrorMessage"] = "Lï¿½tfen tï¿½m alanlar? eksiksiz doldurun.";
+            return RedirectToAction(nameof(Iletisim));
         }
 
-        TempData["ErrorMessage"] = "Lütfen formdaki zorunlu alanlarý eksiksiz doldurun.";
-        return RedirectToAction("Iletisim");
+        await _messageService.AddAsync(new ContactMessage
+        {
+            Name = name.Trim(),
+            Email = email.Trim(),
+            Subject = subject.Trim(),
+            Message = message.Trim(),
+            IsRead = false
+        });
+
+        TempData["SuccessMessage"] = "Mesaj?n?z ba?ar?yla gï¿½nderildi. En k?sa sï¿½rede size dï¿½nï¿½? yapaca??z.";
+        return RedirectToAction(nameof(Iletisim));
     }
 }

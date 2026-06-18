@@ -1,0 +1,24 @@
+@model Blog.Core.Entities.SiteSetting
+@using Blog.Web.Helpers
+@{
+    var siteName = string.IsNullOrWhiteSpace(Model.SiteTitle) ? "SimpleBlog" : Model.SiteTitle;
+    var year = DateTime.Now.Year;
+    var socialLinks = SocialLinkBuilder.FromSettings(Model);
+}
+
+<footer id="footer" class="footer mt-5">
+    <div class="footer-legal py-4 border-top">
+        <div class="container">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <div class="copyright">
+                        © @year <strong><span>@siteName</span></strong>. Tüm Hakları Saklıdır.
+                    </div>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    @await Html.PartialAsync("_SocialLinks", socialLinks, new ViewDataDictionary(ViewData) { { "SocialLinksClass", "site-social-links site-social-links--footer" } })
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

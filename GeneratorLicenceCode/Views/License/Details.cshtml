@@ -1,0 +1,120 @@
+@model LicenseFormViewModel
+@{
+    ViewData["Title"] = "Lisans Detayı";
+}
+
+<div class="page-header page-header-row">
+    <div>
+        <h1>@Model.Domain</h1>
+        <p>Lisans kaydı detayları</p>
+    </div>
+    <div class="header-actions">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Düzenle</a>
+        <a asp-action="Index" class="btn btn-outline">Listeye Dön</a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="card">
+    <dl class="detail-list">
+        <div class="detail-row">
+            <dt>Domain</dt>
+            <dd><strong>@Model.Domain</strong></dd>
+        </div>
+        <div class="detail-row">
+            <dt>Müşteri</dt>
+            <dd>@(Model.CustomerName ?? "—")</dd>
+        </div>
+        <div class="detail-row">
+            <dt>Durum</dt>
+            <dd>
+                @if (Model.IsActive)
+                {
+                    <span class="badge badge-success">Aktif</span>
+                }
+                else
+                {
+                    <span class="badge badge-muted">Pasif</span>
+                }
+            </dd>
+        </div>
+        <div class="detail-row">
+            <dt>Oluşturma Tarihi</dt>
+            <dd>
+                @Model.CreatedDate?.ToString("dd.MM.yyyy HH:mm")
+                @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                {
+                    <span class="meta-text">— @Model.CreatedBy</span>
+                }
+            </dd>
+        </div>
+        <div class="detail-row">
+            <dt>Son Güncelleme</dt>
+            <dd>
+                @if (Model.UpdatedDate.HasValue)
+                {
+                    @Model.UpdatedDate.Value.ToString("dd.MM.yyyy HH:mm")
+                    @if (!string.IsNullOrEmpty(Model.UpdatedBy))
+                    {
+                        <span class="meta-text">— @Model.UpdatedBy</span>
+                    }
+                }
+                else
+                {
+                    <span class="muted">Henüz güncellenmedi</span>
+                }
+            </dd>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <div class="detail-row">
+                <dt>Notlar</dt>
+                <dd>@Model.Notes</dd>
+            </div>
+        }
+    </dl>
+</div>
+
+<div class="card result-card">
+    <h2>Lisans Anahtarı</h2>
+    <div class="license-key-box">
+        <code id="licenseKey">@Model.LicenseKey</code>
+        <button type="button" class="btn btn-outline btn-sm" onclick="copyLicenseKey()">Kopyala</button>
+    </div>
+
+    @{
+        var verified = Blog.Core.Helpers.SecurityHelper.DecryptDomain(Model.LicenseKey ?? "");
+        var isValid = verified == Model.Domain;
+    }
+    <div class="verification @(isValid ? "verified" : "failed")">
+        <strong>Doğrulama:</strong> @verified
+        @if (isValid)
+        {
+            <span class="badge badge-success">Eşleşme başarılı</span>
+        }
+        else
+        {
+            <span class="badge badge-danger">Eşleşme başarısız</span>
+        }
+    </div>
+
+    <form asp-action="RegenerateKey" method="post" class="inline-form" onsubmit="return confirm('Lisans anahtarı yeniden üretilecek. Devam edilsin mi?');">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-outline btn-sm">Anahtarı Yeniden Üret</button>
+    </form>
+</div>
+
+<div class="card danger-zone">
+    <h3>Tehlikeli İşlem</h3>
+    <p>Bu kaydı silmek geri alınamaz (soft delete). Kayıt listeden kaldırılır.</p>
+    <form asp-action="Delete" method="post" onsubmit="return confirm('Bu lisans kaydını silmek istediğinize emin misiniz?');">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-danger">Kaydı Sil</button>
+    </form>
+</div>

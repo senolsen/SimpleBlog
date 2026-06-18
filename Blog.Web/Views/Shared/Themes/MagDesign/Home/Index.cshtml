@@ -1,0 +1,147 @@
+@model IEnumerable<Blog.Core.Entities.Post>
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    var posts = Model?.ToList() ?? new List<Blog.Core.Entities.Post>();
+    var hero  = posts.FirstOrDefault();
+    var rest  = posts.Skip(1).ToList();
+}
+
+<div class="container py-4" data-aos="fade-up">
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            @if (hero != null)
+            {
+                <!-- Hero Post -->
+                <a href="/Makale/@hero.Slug" class="mag-hero d-block mb-4">
+                    @if (!string.IsNullOrEmpty(hero.CoverImagePath))
+                    {
+                        <img src="@hero.CoverImagePath" alt="@hero.Title">
+                    }
+                    else
+                    {
+                        <img src="https://placehold.co/900x460/111827/ffffff?text=MagDesign" alt="@hero.Title">
+                    }
+                    <div class="mag-hero-body">
+                        <div class="mag-hero-cat">
+                            <span class="mag-label">@hero.Category?.Name</span>
+                        </div>
+                        <div class="mag-hero-title">@hero.Title</div>
+                        <div class="mag-hero-meta">
+                            <i class="bi bi-calendar3"></i>
+                            @hero.CreatedDate.ToString("dd MMM yyyy")
+                            <span>&bull;</span>
+                            <i class="bi bi-eye"></i>
+                            @hero.ViewCount okunma
+                        </div>
+                    </div>
+                </a>
+            }
+
+            @if (rest.Any())
+            {
+                <h2 class="mag-section-title">Son Yazılar</h2>
+                <div class="row g-3">
+                    @{
+                        int postIndex = 0;
+                    }
+                    @foreach (var post in rest)
+                    {
+                        postIndex++;
+                        <div class="col-sm-6">
+                            <div class="mag-card">
+                                <a href="/Makale/@post.Slug" class="mag-card-img">
+                                    @if (!string.IsNullOrEmpty(post.CoverImagePath))
+                                    {
+                                        <img src="@post.CoverImagePath" alt="@post.Title">
+                                    }
+                                    else
+                                    {
+                                        <img src="https://placehold.co/600x300/f3f4f6/9ca3af?text=MagDesign" alt="@post.Title">
+                                    }
+                                </a>
+                                <div class="mag-card-body">
+                                    <div class="mag-card-meta">
+                                        <span class="mag-label">@post.Category?.Name</span>
+                                        <span>@post.CreatedDate.ToString("dd MMM yyyy")</span>
+                                    </div>
+                                    <div class="mag-card-title">
+                                        <a href="/Makale/@post.Slug">@post.Title</a>
+                                    </div>
+                                    <p class="mag-card-excerpt">
+                                        @if (!string.IsNullOrEmpty(post.MetaDescription))
+                                        {
+                                            @post.MetaDescription
+                                        }
+                                        else
+                                        {
+                                            var txt = System.Text.RegularExpressions.Regex.Replace(post.Content, "<.*?>", "");
+                                            @(txt.Length > 120 ? txt.Substring(0, 120) + "…" : txt)
+                                        }
+                                    </p>
+                                    <div class="mag-card-author">
+                                        <i class="bi bi-person-circle"></i>
+                                        <span>Jetexsoft Editör</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (postIndex % 3 == 0)
+                        {
+                            <div class="col-12">
+                                @await Component.InvokeAsync("AdSlot", new { slot = "home-list" })
+                            </div>
+                        }
+                    }
+                </div>
+            }
+
+            @if (!posts.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x display-3 text-muted d-block mb-3"></i>
+                    <h4 class="text-muted">Henüz yayınlanmış bir makale yok.</h4>
+                </div>
+            }
+
+            @* Pagination *@
+            @if (ViewBag.TotalPages > 1)
+            {
+                int cur   = ViewBag.CurrentPage ?? 1;
+                int total = ViewBag.TotalPages;
+                int start = Math.Max(1, cur - 2);
+                int end   = Math.Min(total, cur + 2);
+
+                <div class="mag-pagination">
+                    <a href="/?page=@(cur - 1)" class="@(cur == 1 ? "disabled" : "")" aria-label="Önceki">&laquo;</a>
+
+                    @if (start > 1)
+                    {
+                        <a href="/?page=1">1</a>
+                        @if (start > 2) { <span class="disabled">…</span> }
+                    }
+
+                    @for (int i = start; i <= end; i++)
+                    {
+                        <a href="/?page=@i" class="@(cur == i ? "active" : "")">@i</a>
+                    }
+
+                    @if (end < total)
+                    {
+                        @if (end < total - 1) { <span class="disabled">…</span> }
+                        <a href="/?page=@total">@total</a>
+                    }
+
+                    <a href="/?page=@(cur + 1)" class="@(cur == total ? "disabled" : "")" aria-label="Sonraki">&raquo;</a>
+                </div>
+            }
+
+        </div>
+
+        <div class="col-lg-4">
+            @await Component.InvokeAsync("Sidebar")
+        </div>
+
+    </div>
+</div>

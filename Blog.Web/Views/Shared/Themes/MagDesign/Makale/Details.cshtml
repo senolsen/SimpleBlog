@@ -1,0 +1,123 @@
+@model Blog.Core.Entities.Post
+@{
+    ViewData["Title"]           = Model.Title;
+    ViewData["MetaDescription"] = Model.MetaDescription ?? Model.Title;
+}
+
+<div class="container py-4" data-aos="fade-up">
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+            <article>
+
+                <div class="mag-article-header">
+                    <div class="mag-card-meta mb-2">
+                        <a href="/Kategori/@Model.Category?.Slug" class="mag-label">@Model.Category?.Name</a>
+                        <span><i class="bi bi-calendar3"></i> @Model.CreatedDate.ToString("dd MMMM yyyy")</span>
+                        <span><i class="bi bi-eye text-accent"></i> @Model.ViewCount okunma</span>
+                    </div>
+                    <h1 class="mag-article-title">@Model.Title</h1>
+                </div>
+
+                <div class="mag-article-author-bar">
+                    <i class="bi bi-person-circle mag-article-author-icon"></i>
+                    <div>
+                        <div class="mag-article-author-name">Jetexsoft Editör</div>
+                        <p class="mag-article-author-bio">Yazılım &amp; Teknoloji Tutkunu</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.CoverImagePath))
+                {
+                    <div class="mag-article-cover">
+                        <img src="@Model.CoverImagePath" alt="@Model.Title">
+                    </div>
+                }
+
+                <div class="mag-article-body">
+                    @Html.Raw(Model.Content)
+                </div>
+
+                @await Component.InvokeAsync("AdSlot", new { slot = "post-bottom" })
+
+                @if (Model.PostTags != null && Model.PostTags.Any())
+                {
+                    <div class="mag-tags mt-4">
+                        <span class="text-muted me-1" style="font-size:.8rem;"><i class="bi bi-tags-fill"></i> Etiketler:</span>
+                        @foreach (var pt in Model.PostTags)
+                        {
+                            <a href="/Etiket/@pt.Tag?.Name" class="mag-tag">@pt.Tag?.Name</a>
+                        }
+                    </div>
+                }
+
+                @* Comments *@
+                <div class="mt-5" id="comments">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success fw-bold"><i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]</div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]</div>
+                    }
+
+                    <h3 class="mag-comments-title">
+                        <i class="bi bi-chat-dots me-2 text-accent"></i>
+                        @(Model.Comments?.Count(c => c.IsApproved) ?? 0) Yorum
+                    </h3>
+
+                    @if (Model.Comments != null && Model.Comments.Any(c => c.IsApproved))
+                    {
+                        @foreach (var c in Model.Comments.Where(c => c.IsApproved).OrderByDescending(c => c.CreatedDate))
+                        {
+                            <div class="mag-comment">
+                                <div class="mag-comment-avatar">@c.Name.Substring(0, 1).ToUpper()</div>
+                                <div class="flex-grow-1">
+                                    <div class="mag-comment-name">@c.Name</div>
+                                    <div class="mag-comment-date"><i class="bi bi-clock me-1"></i>@c.CreatedDate.ToString("dd MMMM yyyy, HH:mm")</div>
+                                    <p class="mag-comment-text">@c.Content</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                    }
+
+                    <div class="mag-comment-form">
+                        <h4>Bir Yorum Bırakın</h4>
+                        <form action="/Makale/AddComment" method="post">
+                            <input type="hidden" name="PostId" value="@Model.Id" />
+                            <input type="hidden" name="Slug"   value="@Model.Slug" />
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size:.85rem;">Adınız *</label>
+                                    <input name="Name" type="text" class="form-control" placeholder="Ahmet Yılmaz" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size:.85rem;">E-Posta (İsteğe Bağlı)</label>
+                                    <input name="Email" type="email" class="form-control" placeholder="ahmet@mail.com">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" style="font-size:.85rem;">Yorumunuz *</label>
+                                <textarea name="Content" class="form-control" rows="4" placeholder="Düşüncelerinizi paylaşın…" required></textarea>
+                            </div>
+                            <button type="submit" class="mag-btn">
+                                <i class="bi bi-send me-2"></i>Yorumu Gönder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </article>
+        </div>
+
+        <div class="col-lg-4">
+            @await Component.InvokeAsync("Sidebar")
+        </div>
+
+    </div>
+</div>

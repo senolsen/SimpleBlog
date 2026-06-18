@@ -18,8 +18,9 @@ public class AdminLicenseMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Eğer istek lisans giriş sayfasına gidiyorsa, kontrol etmeden geçişe izin ver!
-        if (context.Request.Path.StartsWithSegments("/Admin/License"))
+        var path = context.Request.Path;
+
+        if (IsLicenseExemptPath(path))
         {
             await _next(context);
             return;
@@ -32,23 +33,19 @@ public class AdminLicenseMiddleware
 
             if (!_cache.TryGetValue("IsLicenseValid", out bool isValid))
             {
-                // DB'ye erişmek için context'i buradan alıyoruz
-                using (var scope = context.RequestServices.CreateScope())
+                using var scope = context.RequestServices.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.IsActive && !l.IsDeleted);
+
+                if (license == null || string.IsNullOrEmpty(license.Key))
                 {
-                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-                    // Veritabanındaki aktif lisansı getir
-                    var license = await db.Licenses.FirstOrDefaultAsync(l => l.IsActive && !l.IsDeleted);
-
-                    if (license == null || string.IsNullOrEmpty(license.Key))
-                    {
-                        isValid = false;
-                    }
-                    else
-                    {
-                        var decryptedDomain = SecurityHelper.DecryptDomain(license.Key);
-                        isValid = decryptedDomain == currentDomain;
-                    }
+                    isValid = false;
+                }
+                else
+                {
+                    var decryptedDomain = SecurityHelper.DecryptDomain(license.Key);
+                    isValid = decryptedDomain == currentDomain;
                 }
 
                 _cache.Set("IsLicenseValid", isValid, TimeSpan.FromHours(12));
@@ -56,11 +53,15 @@ public class AdminLicenseMiddleware
 
             if (!isValid)
             {
-                context.Response.ContentType = "text/html; charset=utf-8";
-                await context.Response.WriteAsync("<h1 style='color:red; text-align:center;'>Lisans Hatası!</h1><p style='text-align:center;'>Geçerli bir lisans bulunamadı.</p>");
+                context.Response.Redirect("/Admin/License/Activate");
                 return;
             }
         }
         await _next(context);
+    }
+
+    private static bool IsLicenseExemptPath(PathString path)
+    {
+        return path.StartsWithSegments("/Admin/License", StringComparison.OrdinalIgnoreCase);
     }
 }

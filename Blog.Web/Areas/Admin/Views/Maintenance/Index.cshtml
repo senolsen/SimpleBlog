@@ -1,0 +1,139 @@
+@model Blog.Web.Areas.Admin.Models.MaintenanceViewModel
+@{
+    ViewData["Title"] = "Site Bakımı";
+}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <h3 class="mb-0"><i class="fas fa-tools me-2"></i> Site Bakımı</h3>
+    </div>
+</div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                @* Bakım Modu Kartı *@
+                <div class="card card-outline card-warning shadow mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0"><i class="fas fa-wrench me-2"></i>Bakım Modu</h5>
+                        @if (Model.IsMaintenanceMode)
+                        {
+                            <span class="badge text-bg-warning"><i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i> Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-success"><i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i> Site Yayında</span>
+                        }
+                    </div>
+                    <form asp-area="Admin" asp-controller="Maintenance" asp-action="UpdateMode" method="post" id="maintenanceForm">
+                        @Html.AntiForgeryToken()
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Bakım modu açıkken ziyaretçiler bakım sayfasını görür.
+                                <strong>Admin paneli (/Admin)</strong> her zaman erişilebilir kalır.
+                            </p>
+
+                            <div class="form-check form-switch mb-4">
+                                <input asp-for="IsMaintenanceMode" class="form-check-input" type="checkbox" role="switch" />
+                                <label class="form-check-label fw-semibold" asp-for="IsMaintenanceMode">
+                                    Bakım modunu etkinleştir
+                                </label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="MaintenanceMessage" class="form-label">Bakım mesajı <span class="text-muted fw-normal">(isteğe bağlı)</span></label>
+                                <textarea asp-for="MaintenanceMessage" class="form-control" rows="3"
+                                          maxlength="500"
+                                          placeholder="Örn: Sitemiz güncelleniyor, birkaç dakika içinde tekrar yayında olacağız."></textarea>
+                                <div class="form-text">Boş bırakılırsa varsayılan mesaj gösterilir. En fazla 500 karakter.</div>
+                            </div>
+
+                            @if (Model.IsMaintenanceMode)
+                            {
+                                <div class="alert alert-warning mb-0">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Bakım modu şu an <strong>aktif</strong>. Ziyaretçiler siteye erişemiyor.
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i> Bakım Ayarlarını Kaydet
+                            </button>
+                            <a href="/" target="_blank" class="btn btn-outline-secondary ms-2">
+                                <i class="fas fa-external-link-alt me-1"></i> Siteyi Önizle
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                @* Demo Veri Sıfırlama Kartı *@
+                <div class="card card-outline card-danger shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-danger"><i class="fas fa-database me-2"></i>Demo Veri Sıfırlama</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-3">Bu işlem aşağıdaki verileri kalıcı olarak siler ve varsayılan demo içeriği yeniden oluşturur:</p>
+                        <ul class="mb-4">
+                            <li>Tüm blog yazıları, kategoriler ve etiketler</li>
+                            <li>Tüm yorumlar ve iletişim mesajları</li>
+                            <li>Tüm sabit sayfalar</li>
+                            <li>Site ayarları (tema, logo, reklam kodları vb.)</li>
+                        </ul>
+
+                        <div class="alert alert-success mb-4">
+                            <strong>Korunan veriler:</strong> Kullanıcı hesapları, roller ve lisans bilgisi silinmez.
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <strong>Sıfırlama sonrası oluşturulacak demo içerik:</strong>
+                            5 kategori, 100 yazı, 10 etiket, 3 sayfa, 30 yorum — varsayılan tema: <strong>MagDesign</strong>
+                        </div>
+                    </div>
+                    <form asp-action="Reset" method="post" id="resetForm">
+                        @Html.AntiForgeryToken()
+                        <div class="card-footer">
+                            <div class="mb-3">
+                                <label for="confirmationText" class="form-label">Onaylamak için kutucuğa <strong>SIFIRLA</strong> yazın</label>
+                                <input type="text" name="confirmationText" id="confirmationText" class="form-control" placeholder="SIFIRLA" autocomplete="off" required />
+                            </div>
+                            <button type="button" class="btn btn-danger" id="btnReset">
+                                <i class="fas fa-sync-alt me-1"></i> Demo Verileri Sıfırla
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnReset').addEventListener('click', function () {
+            const text = document.getElementById('confirmationText').value.trim().toUpperCase();
+            if (text !== 'SIFIRLA') {
+                Swal.fire('Hata', 'Onay metni hatalı. Kutucuğa SIFIRLA yazın.', 'error');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                html: 'Tüm içerik silinip demo veriler yeniden yüklenecek.<br><strong>Bu işlem geri alınamaz!</strong>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, Sıfırla',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('resetForm').submit();
+                }
+            });
+        });
+    </script>
+}

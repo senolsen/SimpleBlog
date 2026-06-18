@@ -40,6 +40,8 @@
                         @Html.Raw(Model.Content)
                     </div>
 
+                    @await Component.InvokeAsync("AdSlot", new { slot = "post-bottom" })
+
                     <!-- ETİKETLER (TAGS) -->
                     @if (Model.PostTags != null && Model.PostTags.Any())
                     {
@@ -136,13 +138,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="sidebar ps-lg-4">
-                    @await Component.InvokeAsync("SidebarPopularPosts")
-                    @await Component.InvokeAsync("SidebarCategories")
-
-
-                    @await Component.InvokeAsync("SidebarTags")
-                </div>
+                @await Component.InvokeAsync("Sidebar")
             </div>
 
         </div>

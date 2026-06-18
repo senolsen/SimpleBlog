@@ -1,0 +1,144 @@
+@model Blog.Web.Areas.Admin.Models.LicenseActivateViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lisans Etkinleştirme | @Model.CompanyName</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .activate-card {
+            width: min(480px, 100%);
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: none;
+            padding: 2rem 2rem 1rem;
+            text-align: center;
+        }
+
+        .icon-circle {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.75rem;
+        }
+
+        .domain-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .support-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+        }
+
+        .support-box a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .support-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="activate-card card">
+        <div class="card-header">
+            <div class="icon-circle">
+                <i class="fas fa-key"></i>
+            </div>
+            <h4 class="fw-bold mb-1">Lisans Etkinleştirme</h4>
+            <p class="text-muted mb-2">Blog yönetim panelini kullanmak için lisans anahtarınızı girin.</p>
+            <span class="domain-badge">
+                <i class="fas fa-globe me-1"></i> @Model.CurrentDomain
+            </span>
+        </div>
+
+        <div class="card-body px-4 pb-2">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <form asp-action="Activate" asp-controller="License" asp-area="Admin" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="LicenseKey" class="form-label fw-semibold">Lisans Anahtarı</label>
+                    <textarea asp-for="LicenseKey" class="form-control" rows="4"
+                              placeholder="@Model.CompanyName tarafından size iletilen lisans kodunu buraya yapıştırın..."></textarea>
+                    <span asp-validation-for="LicenseKey" class="text-danger small"></span>
+                </div>
+
+                <div class="alert alert-info py-2 mb-3">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Lisans anahtarı yalnızca <strong>@Model.CurrentDomain</strong> alan adı için geçerlidir.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 mb-3">
+                    <i class="fas fa-check-circle me-1"></i> Lisansı Etkinleştir
+                </button>
+            </form>
+        </div>
+
+        <div class="card-footer bg-white border-top-0 px-4 pb-4 pt-0">
+            <div class="support-box">
+                <p class="mb-2 fw-semibold text-dark">
+                    <i class="fas fa-headset me-1 text-primary"></i> Lisans anahtarınız yok mu?
+                </p>
+                <p class="mb-2 small text-muted">
+                    Satın alma sonrası size e-posta ile iletilen lisans kodunu kullanın.
+                    Sorun yaşıyorsanız bizimle iletişime geçin:
+                </p>
+                <p class="mb-1">
+                    <i class="fas fa-envelope me-1 text-muted"></i>
+                    <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-external-link-alt me-1 text-muted"></i>
+                    <a href="@Model.SupportUrl" target="_blank" rel="noopener">@Model.SupportUrl</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

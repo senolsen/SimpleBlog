@@ -29,6 +29,23 @@ public class SiteSetting : BaseEntity
     public string? AdsenseCode { get; set; } // Ana AdSense scripti
     public string? SidebarAdCode { get; set; } // Yan menü reklam alanı
     public string? PostBottomAdCode { get; set; } // Yazı altı reklam alanı
+    public string? HomeListAdCode { get; set; } // Ana sayfa liste arası reklam
 
     public string? AdsTxtContent { get; set; }
+
+    public string? RobotsTxtContent { get; set; }
+
+    public string ActiveTheme { get; set; } = "MagDesign";
+
+    // Bakım Modu
+    public bool IsMaintenanceMode { get; set; }
+    public string? MaintenanceMessage { get; set; }
+
+    // Sistem Güncelleme (FTP)
+    public string? UpdateFtpHost { get; set; }
+    public int UpdateFtpPort { get; set; } = 21;
+    public string? UpdateFtpUsername { get; set; }
+    public string? UpdateFtpPasswordProtected { get; set; }
+    public string? UpdateFtpRemotePath { get; set; } = "/";
+    public bool UpdateFtpUseSsl { get; set; }
 }

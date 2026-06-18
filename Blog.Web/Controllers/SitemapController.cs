@@ -39,6 +39,12 @@ public class SitemapController : Controller
         sb.AppendLine("    <priority>1.0</priority>");
         sb.AppendLine("  </url>");
 
+        sb.AppendLine("  <url>");
+        sb.AppendLine($"    <loc>{baseUrl}/feed</loc>");
+        sb.AppendLine("    <changefreq>daily</changefreq>");
+        sb.AppendLine("    <priority>0.5</priority>");
+        sb.AppendLine("  </url>");
+
         // 2. SABİT SAYFALAR (YENİ EKLENEN KISIM)
         // Veritabanından aktif ve silinmemiş sayfaları çekiyoruz
         var pages = await _context.Pages
@@ -61,7 +67,7 @@ public class SitemapController : Controller
         foreach (var category in categories)
         {
             sb.AppendLine("  <url>");
-            sb.AppendLine($"    <loc>{baseUrl}/kategori/{category.Slug}</loc>");
+            sb.AppendLine($"    <loc>{baseUrl}/Kategori/{category.Slug}</loc>");
             sb.AppendLine("    <changefreq>weekly</changefreq>");
             sb.AppendLine("    <priority>0.7</priority>");
             sb.AppendLine("  </url>");
@@ -72,7 +78,7 @@ public class SitemapController : Controller
         foreach (var post in posts)
         {
             sb.AppendLine("  <url>");
-            sb.AppendLine($"    <loc>{baseUrl}/yazi/{post.Slug}</loc>");
+            sb.AppendLine($"    <loc>{baseUrl}/Makale/{post.Slug}</loc>");
             sb.AppendLine($"    <lastmod>{post.UpdatedDate?.ToString("yyyy-MM-ddTHH:mm:sszzz") ?? post.CreatedDate.ToString("yyyy-MM-ddTHH:mm:sszzz")}</lastmod>");
             sb.AppendLine("    <changefreq>weekly</changefreq>");
             sb.AppendLine("    <priority>0.9</priority>");
@@ -86,18 +92,16 @@ public class SitemapController : Controller
 
     // domain.com/robots.txt adresinde çalışır
     [Route("robots.txt")]
-    public IActionResult RobotsTxt()
+    public async Task<IActionResult> RobotsTxt()
     {
+        var setting = await _context.SiteSettings.AsNoTracking().FirstOrDefaultAsync();
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
-        var sb = new StringBuilder();
 
-        sb.AppendLine("User-agent: *");
-        sb.AppendLine("Allow: /");
-        sb.AppendLine("Disallow: /Admin/"); // Arama motorlarının admin paneline girmesini yasakla!
-        sb.AppendLine();
-        sb.AppendLine($"Sitemap: {baseUrl}/sitemap.xml"); // Google'a sitemap adresimizi göster
+        if (!string.IsNullOrWhiteSpace(setting?.RobotsTxtContent))
+            return Content(setting.RobotsTxtContent.Trim(), "text/plain", Encoding.UTF8);
 
-        return Content(sb.ToString(), "text/plain", Encoding.UTF8);
+        var content = $"User-agent: *{Environment.NewLine}Allow: /{Environment.NewLine}Disallow: /Admin/{Environment.NewLine}{Environment.NewLine}Sitemap: {baseUrl}/sitemap.xml";
+        return Content(content, "text/plain", Encoding.UTF8);
     }
 
     // domain.com/ads.txt adresinde çalışır

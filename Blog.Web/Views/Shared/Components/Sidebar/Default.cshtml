@@ -1,0 +1,6 @@
+<div class="sidebar ps-lg-4">
+    @await Component.InvokeAsync("AdSlot", new { slot = "sidebar" })
+    @await Component.InvokeAsync("SidebarCategories")
+    @await Component.InvokeAsync("SidebarPopularPosts")
+    @await Component.InvokeAsync("SidebarTags")
+</div>

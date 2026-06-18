@@ -1,0 +1,121 @@
+@model IEnumerable<GeneratorLicenceCode.Entities.LicenseRecord>
+@{
+    ViewData["Title"] = "Lisans Listesi";
+    var search = ViewBag.Search as string;
+    var status = ViewBag.Status as string;
+}
+
+<div class="page-header page-header-row">
+    <div>
+        <h1>Lisans Yönetimi</h1>
+        <p>Oluşturulan tüm lisansları görüntüleyin, düzenleyin ve yönetin.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Yeni Lisans</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="card">
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label for="search">Ara</label>
+            <input type="text" id="search" name="search" value="@search" class="form-control" placeholder="Domain, müşteri veya not..." />
+        </div>
+        <div class="form-group">
+            <label for="status">Durum</label>
+            <select id="status" name="status" class="form-control">
+                <option value="">Tümü</option>
+                @if (status == "active")
+                {
+                    <option value="active" selected>Aktif</option>
+                }
+                else
+                {
+                    <option value="active">Aktif</option>
+                }
+                @if (status == "passive")
+                {
+                    <option value="passive" selected>Pasif</option>
+                }
+                else
+                {
+                    <option value="passive">Pasif</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-outline">Filtrele</button>
+        <a asp-action="Index" class="btn btn-outline">Temizle</a>
+    </form>
+</div>
+
+<div class="card table-card">
+    @if (!Model.Any())
+    {
+        <p class="empty-state">Henüz lisans kaydı yok. <a asp-action="Create">İlk lisansı oluşturun.</a></p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Müşteri</th>
+                        <th>Oluşturma</th>
+                        <th>Güncelleme</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.Domain</strong></td>
+                            <td>@(item.CustomerName ?? "—")</td>
+                            <td>
+                                <span>@item.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                @if (!string.IsNullOrEmpty(item.CreatedBy))
+                                {
+                                    <small class="meta-text">@item.CreatedBy</small>
+                                }
+                            </td>
+                            <td>
+                                @if (item.UpdatedDate.HasValue)
+                                {
+                                    <span>@item.UpdatedDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                                    @if (!string.IsNullOrEmpty(item.UpdatedBy))
+                                    {
+                                        <small class="meta-text">@item.UpdatedBy</small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge badge-success">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-muted">Pasif</span>
+                                }
+                            </td>
+                            <td class="actions-cell">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-sm">Detay</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline btn-sm">Düzenle</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="table-footer">Toplam @Model.Count() kayıt</p>
+    }
+</div>

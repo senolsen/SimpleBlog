@@ -1,0 +1,356 @@
+@model IEnumerable<Blog.Core.Entities.Post>
+
+@{
+
+    ViewData["Title"] = "Ana Sayfa";
+
+    var settings = ViewData["SiteSettings"] as Blog.Core.Entities.SiteSetting;
+
+    var siteTitle = settings?.SiteTitle ?? "SimpleBlog";
+
+    var siteDesc = settings?.SiteDescription ?? "Güncel yazılar, haberler ve içerikler.";
+
+    var posts = Model?.ToList() ?? new List<Blog.Core.Entities.Post>();
+
+    var hero = posts.FirstOrDefault();
+
+    var rest = posts.Skip(1).ToList();
+
+}
+
+
+
+<header class="bh-page-header py-5 bg-light border-bottom mb-4">
+
+    <div class="container">
+
+        <div class="text-center my-3">
+
+            <h1 class="fw-bolder">@siteTitle</h1>
+
+            <p class="lead mb-0">@siteDesc</p>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<div class="container mb-5">
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+
+
+            @if (hero != null)
+
+            {
+
+                <div class="card mb-4 bh-featured-card">
+
+                    <a href="/Makale/@hero.Slug">
+
+                        @if (!string.IsNullOrEmpty(hero.CoverImagePath))
+
+                        {
+
+                            <img class="card-img-top" src="@hero.CoverImagePath" alt="@hero.Title">
+
+                        }
+
+                        else
+
+                        {
+
+                            <img class="card-img-top" src="https://dummyimage.com/850x350/dee2e6/6c757d.jpg" alt="@hero.Title">
+
+                        }
+
+                    </a>
+
+                    <div class="card-body">
+
+                        <div class="small text-muted mb-2">
+
+                            <i class="bi bi-calendar3 me-1"></i>@hero.CreatedDate.ToString("dd MMMM yyyy")
+
+                            @if (!string.IsNullOrEmpty(hero.Category?.Name))
+
+                            {
+
+                                <span class="mx-2">&bull;</span>
+
+                                <a href="/Kategori/@hero.Category.Slug" class="text-muted text-decoration-none">@hero.Category.Name</a>
+
+                            }
+
+                        </div>
+
+                        <h2 class="card-title"><a href="/Makale/@hero.Slug" class="text-decoration-none text-dark">@hero.Title</a></h2>
+
+                        <p class="card-text">
+
+                            @if (!string.IsNullOrEmpty(hero.MetaDescription))
+
+                            {
+
+                                @hero.MetaDescription
+
+                            }
+
+                            else
+
+                            {
+
+                                var txt = System.Text.RegularExpressions.Regex.Replace(hero.Content, "<.*?>", "");
+
+                                @(txt.Length > 200 ? txt.Substring(0, 200) + "…" : txt)
+
+                            }
+
+                        </p>
+
+                        <a class="btn btn-primary" href="/Makale/@hero.Slug">Devamını oku &rarr;</a>
+
+                    </div>
+
+                </div>
+
+            }
+
+
+
+            @if (rest.Any())
+
+            {
+
+                <div class="row">
+
+                    @{
+                        int postIndex = 0;
+                    }
+                    @foreach (var post in rest)
+                    {
+                        postIndex++;
+                        <div class="col-lg-6">
+
+                            <div class="card mb-4">
+
+                                <a href="/Makale/@post.Slug">
+
+                                    @if (!string.IsNullOrEmpty(post.CoverImagePath))
+
+                                    {
+
+                                        <img class="card-img-top" src="@post.CoverImagePath" alt="@post.Title">
+
+                                    }
+
+                                    else
+
+                                    {
+
+                                        <img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="@post.Title">
+
+                                    }
+
+                                </a>
+
+                                <div class="card-body">
+
+                                    <div class="small text-muted mb-2">
+
+                                        <i class="bi bi-calendar3 me-1"></i>@post.CreatedDate.ToString("dd MMMM yyyy")
+
+                                    </div>
+
+                                    <h2 class="card-title h4"><a href="/Makale/@post.Slug" class="text-decoration-none text-dark">@post.Title</a></h2>
+
+                                    <p class="card-text">
+
+                                        @if (!string.IsNullOrEmpty(post.MetaDescription))
+
+                                        {
+
+                                            @post.MetaDescription
+
+                                        }
+
+                                        else
+
+                                        {
+
+                                            var txt = System.Text.RegularExpressions.Regex.Replace(post.Content, "<.*?>", "");
+
+                                            @(txt.Length > 120 ? txt.Substring(0, 120) + "…" : txt)
+
+                                        }
+
+                                    </p>
+
+                                    <a class="btn btn-primary btn-sm" href="/Makale/@post.Slug">Devamını oku &rarr;</a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        @if (postIndex % 3 == 0)
+                        {
+                            <div class="col-12">
+                                @await Component.InvokeAsync("AdSlot", new { slot = "home-list" })
+                            </div>
+                        }
+                    }
+
+                </div>
+
+            }
+
+
+
+            @if (!posts.Any())
+
+            {
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-journal-x display-3 text-muted d-block mb-3"></i>
+
+                    <h4 class="text-muted">Henüz yayınlanmış bir makale yok.</h4>
+
+                </div>
+
+            }
+
+
+
+            @if (ViewBag.TotalPages > 1)
+
+            {
+
+                int cur = ViewBag.CurrentPage ?? 1;
+
+                int total = ViewBag.TotalPages;
+
+                int start = Math.Max(1, cur - 2);
+
+                int end = Math.Min(total, cur + 2);
+
+
+
+                <nav aria-label="Sayfalama">
+
+                    <hr class="my-0">
+
+                    <ul class="pagination justify-content-center my-4">
+
+                        <li class="page-item @(cur == 1 ? "disabled" : "")">
+
+                            <a class="page-link" href="/?page=@(cur - 1)" tabindex="@(cur == 1 ? "-1" : null)" aria-disabled="@(cur == 1 ? "true" : null)">Önceki</a>
+
+                        </li>
+
+
+
+                        @if (start > 1)
+
+                        {
+
+                            <li class="page-item"><a class="page-link" href="/?page=1">1</a></li>
+
+                            @if (start > 2)
+
+                            {
+
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+
+                            }
+
+                        }
+
+
+
+                        @for (int i = start; i <= end; i++)
+
+                        {
+
+                            if (cur == i)
+
+                            {
+
+                                <li class="page-item active" aria-current="page">
+
+                                    <a class="page-link" href="/?page=@i">@i</a>
+
+                                </li>
+
+                            }
+
+                            else
+
+                            {
+
+                                <li class="page-item">
+
+                                    <a class="page-link" href="/?page=@i">@i</a>
+
+                                </li>
+
+                            }
+
+                        }
+
+
+
+                        @if (end < total)
+
+                        {
+
+                            @if (end < total - 1)
+
+                            {
+
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+
+                            }
+
+                            <li class="page-item"><a class="page-link" href="/?page=@total">@total</a></li>
+
+                        }
+
+
+
+                        <li class="page-item @(cur == total ? "disabled" : "")">
+
+                            <a class="page-link" href="/?page=@(cur + 1)">Sonraki</a>
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            }
+
+
+
+        </div>
+
+
+
+        <div class="col-lg-4">
+
+            @await Component.InvokeAsync("Sidebar")
+
+        </div>
+
+    </div>
+
+</div>
+

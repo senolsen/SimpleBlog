@@ -1,0 +1,194 @@
+@model Blog.Core.Entities.SiteSetting
+
+@{
+
+    ViewData["Title"] = "İletişim";
+
+    ViewData["MetaDescription"] = "Soru ve önerileriniz için bizimle iletişime geçin.";
+
+}
+
+
+
+<header class="bh-page-header py-4 bg-light border-bottom mb-4">
+
+    <div class="container">
+
+        <div class="text-center">
+
+            <h1 class="fw-bolder mb-2"><i class="bi bi-envelope me-2"></i>İletişim</h1>
+
+            <p class="lead mb-0">Soru, görüş ve proje fikirleriniz için bize ulaşın.</p>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<div class="container mb-5">
+
+
+
+    @if (TempData["SuccessMessage"] != null)
+
+    {
+
+        <div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]</div>
+
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+
+    {
+
+        <div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]</div>
+
+    }
+
+
+
+    @if (!string.IsNullOrEmpty(Model?.MapUrl))
+
+    {
+
+        <div class="card mb-4 overflow-hidden">
+
+            <iframe src="@Model.MapUrl" style="border:0;width:100%;height:320px;" allowfullscreen loading="lazy"></iframe>
+
+        </div>
+
+    }
+
+
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+
+            <div class="card mb-3">
+
+                <div class="card-body d-flex gap-3">
+
+                    <i class="bi bi-geo-alt fs-4 text-primary"></i>
+
+                    <div>
+
+                        <h5 class="card-title h6">Adres</h5>
+
+                        <p class="card-text small text-muted mb-0">@(Model?.ContactAddress ?? "Türkiye")</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card mb-3">
+
+                <div class="card-body d-flex gap-3">
+
+                    <i class="bi bi-telephone fs-4 text-primary"></i>
+
+                    <div>
+
+                        <h5 class="card-title h6">Telefon</h5>
+
+                        <p class="card-text small text-muted mb-0">@(Model?.ContactPhone ?? "+90 5XX XXX XX XX")</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card mb-3">
+
+                <div class="card-body d-flex gap-3">
+
+                    <i class="bi bi-envelope fs-4 text-primary"></i>
+
+                    <div>
+
+                        <h5 class="card-title h6">E-Posta</h5>
+
+                        <p class="card-text small text-muted mb-0">@(Model?.ContactEmail ?? "info@site.com")</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="col-md-8">
+
+            <div class="card">
+
+                <div class="card-header fw-bold">Mesaj Gönderin</div>
+
+                <div class="card-body">
+
+                    <form action="/Iletisim" method="post">
+
+                        <div class="row g-3 mb-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Adınız Soyadınız *</label>
+
+                                <input type="text" name="Name" class="form-control" placeholder="Ahmet Yılmaz" required>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">E-Posta *</label>
+
+                                <input type="email" name="Email" class="form-control" placeholder="ahmet@mail.com" required>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">Konu *</label>
+
+                            <input type="text" name="Subject" class="form-control" placeholder="Konu" required>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">Mesajınız *</label>
+
+                            <textarea name="Message" class="form-control" rows="5" placeholder="Mesajınız…" required></textarea>
+
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+
+                            <i class="bi bi-send me-2"></i>Mesajı Gönder
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+</div>
+

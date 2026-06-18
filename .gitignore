@@ -353,6 +353,10 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
+# GeneratorLicenceCode SQLite database
+GeneratorLicenceCode/licence.db
+GeneratorLicenceCode/licence.db-*
+
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
